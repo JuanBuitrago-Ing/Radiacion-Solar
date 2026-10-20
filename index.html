@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Observatorio Solar · Prototipo v11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sol:#F5A524; --cielo:#8FD3F4; --montana:#2E5E4E; --agua:#1F7A9C; --nube:#F5F8FB; --texto:#16323F;
+  --glass:rgba(9,26,38,.46); --glass-2:rgba(255,255,255,.08); --glass-b:rgba(255,255,255,.16);
+  --ink:#fff; --ink-2:rgba(255,255,255,.78); --ink-3:rgba(255,255,255,.55);
+  --fs:Inter,system-ui,sans-serif; --fd:Sora,Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#0A1430;font-family:var(--fs);color:var(--ink);overflow-x:hidden}
+#c3d{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+#dim{position:fixed;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,rgba(8,20,32,0) 0%,rgba(8,20,32,.35) 100%);opacity:0}
+#err{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);background:var(--glass);padding:14px 18px;border-radius:14px;display:none;z-index:5}
+main{position:relative;z-index:2}
+.glass{background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px clamp(16px,4vw,48px)}
+.brand{display:flex;align-items:center;gap:10px;font:700 17px var(--fd);text-shadow:0 1px 10px rgba(0,0,0,.25)}
+.brand small{display:block;font:500 11px var(--fs);opacity:.85;letter-spacing:.6px;text-transform:uppercase}
+.navlinks{display:flex;gap:6px;padding:4px;border-radius:999px}
+.navlinks a{color:#fff;text-decoration:none;font:600 13px var(--fs);padding:8px 14px;border-radius:999px}
+.navlinks a:hover{background:rgba(255,255,255,.14)}
+.hero-body{flex:1;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:32px;padding:0 clamp(16px,6vw,96px) 110px}
+.eyebrow{display:inline-flex;gap:8px;font:600 12px var(--fs);letter-spacing:1.2px;text-transform:uppercase;padding:7px 12px;border-radius:999px}
+h1{font:800 clamp(34px,6vw,76px)/1.02 var(--fd);letter-spacing:-1.5px;margin:18px 0 16px;text-shadow:0 4px 30px rgba(0,0,0,.25)}
+h1 span{background:linear-gradient(90deg,#FFE29A,#F5A524 60%,#FF8A3D);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(15px,1.4vw,18px);line-height:1.55;max-width:560px;text-shadow:0 1px 12px rgba(0,0,0,.35)}
+.ctas{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.btn{font:600 15px var(--fs);padding:13px 20px;border-radius:14px;border:1px solid var(--glass-b);cursor:pointer;color:#fff;background:var(--glass);text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn.pri{background:linear-gradient(135deg,#F5A524,#FF8A3D);border:0;color:#1d1405;box-shadow:0 10px 30px rgba(245,165,36,.35)}
+.card{border-radius:22px;padding:22px}
+.k{font:600 12px var(--fs);letter-spacing:1px;text-transform:uppercase;color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--fs);background:rgba(245,165,36,.18);border:1px solid rgba(245,165,36,.5);color:#FFE3A6;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:50%;background:#F5A524;box-shadow:0 0 8px #F5A524;animation:pulse 1.6s infinite}
+.chip.mute{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:var(--ink-2)}
+@keyframes pulse{50%{opacity:.3}}
+.big{font:800 clamp(52px,6vw,78px)/1 var(--fd);margin:14px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.big small{font-size:.3em;font-weight:600;letter-spacing:0;opacity:.85;margin-left:6px}
+.meter{height:10px;border-radius:10px;background:rgba(255,255,255,.15);overflow:hidden;margin:12px 0 18px}
+.meter b{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#8FD3F4,#F5A524 60%,#FF7A3D)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--glass-2);border-radius:14px;padding:10px 12px}
+.stat span{display:block;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.6px}
+.stat strong{font:700 16px var(--fd);font-variant-numeric:tabular-nums}
+.equiv{margin-top:14px;font-size:14px;line-height:1.45;display:flex;gap:10px}
+.scrollhint{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);font:600 12px var(--fs);letter-spacing:1px;text-transform:uppercase;opacity:.85;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#fff}
+.scrollhint svg{animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(6px)}}
+
+/* ---------- DASHBOARD ---------- */
+.dash{max-width:1280px;margin:0 auto;padding:12vh clamp(16px,5vw,64px) 140px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.sec-head h2{font:800 clamp(26px,3.4vw,40px)/1.1 var(--fd);letter-spacing:-.8px;text-shadow:0 2px 20px rgba(0,0,0,.3)}
+.sec-head p{color:var(--ink-2);max-width:560px;margin-top:6px;line-height:1.5;text-shadow:0 1px 10px rgba(0,0,0,.3)}
+.viewing{display:none;align-items:center;gap:10px;font:600 13px var(--fs);padding:8px 8px 8px 14px;border-radius:999px}
+.viewing button{border:0;background:#fff;color:var(--texto);font:600 12px var(--fs);padding:6px 12px;border-radius:999px;cursor:pointer}
+.row1{display:grid;grid-template-columns:minmax(280px,.8fr) 2fr;gap:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:16px}
+.tile{border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.tile .v{font:800 34px/1.05 var(--fd);font-variant-numeric:tabular-nums;letter-spacing:-.8px}
+.tile .v small{font:600 14px var(--fs);color:var(--ink-2);margin-left:4px;letter-spacing:0}
+.tile .note{font-size:13px;line-height:1.45;color:var(--ink-2);margin-top:auto}
+.tile .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--glass-2);font-size:18px}
+.tile-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tile.soon{border-style:dashed;border-color:rgba(255,255,255,.3)}
+.tile.soon .v{color:var(--ink-3)}
+.info{border:0;background:rgba(255,255,255,.12);color:#fff;width:22px;height:22px;border-radius:50%;font:700 12px var(--fs);cursor:pointer;flex:none}
+.explain{display:none;font-size:13px;line-height:1.5;color:var(--ink-2);background:rgba(255,255,255,.06);padding:10px 12px;border-radius:12px}
+.explain.on{display:block}
+/* gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center}
+.gauge-wrap svg{width:100%;max-width:340px;height:auto;overflow:visible}
+.gval{font:800 46px var(--fd);fill:#fff;font-variant-numeric:tabular-nums}
+.gunit{font:600 14px var(--fs);fill:rgba(255,255,255,.75)}
+.gtick{font:500 11px var(--fs);fill:rgba(255,255,255,.55)}
+.zone{display:inline-flex;align-items:center;gap:8px;font:600 14px var(--fs);margin-top:4px}
+.zone i{width:10px;height:10px;border-radius:50%}
+.gsub{display:flex;gap:10px;width:100%;margin-top:14px}
+.gsub .stat{flex:1}
+/* chart */
+.chart-card{position:relative}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:18px;height:3px;border-radius:2px;display:inline-block}
+#chart{width:100%;height:300px;display:block;margin-top:10px;touch-action:none}
+.tip{position:absolute;pointer-events:none;background:rgba(6,18,28,.92);border:1px solid var(--glass-b);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;min-width:170px;opacity:0;transition:opacity .12s;z-index:3}
+.tip b{font:700 13px var(--fd)}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+.tip .r span{color:var(--ink-2)}
+/* history */
+.hist{margin-top:16px;border-radius:22px;padding:22px}
+.hist-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:20px;align-items:stretch}
+#hchart{width:100%;height:290px;display:block}
+.dl{display:flex;flex-direction:column;gap:12px;justify-content:center;background:var(--glass-2);border-radius:16px;padding:18px}
+.dl p{font-size:14px;line-height:1.5;color:var(--ink-2)}
+.dl select{font:500 14px var(--fs);padding:9px 10px;border-radius:10px;border:1px solid var(--glass-b);background:rgba(0,0,0,.25);color:#fff}
+/* timebar */
+.timebar{position:fixed;left:clamp(16px,4vw,48px);right:clamp(16px,4vw,48px);bottom:16px;z-index:4;display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:18px}
+.play{width:38px;height:38px;flex:none;border-radius:50%;border:0;background:#fff;color:var(--texto);cursor:pointer;display:grid;place-items:center}
+.timebar input{flex:1;accent-color:#F5A524;min-width:0}
+.tlabel{font:700 18px var(--fd);font-variant-numeric:tabular-nums;min-width:58px;text-align:right}
+.speed{border:1px solid var(--glass-b);background:transparent;color:#fff;font:600 12px var(--fs);padding:6px 10px;border-radius:999px;cursor:pointer}
+.hint{font-size:12px;color:var(--ink-2);white-space:nowrap}
+.navr{display:flex;gap:8px;align-items:center}
+.gear{width:42px;height:42px;border-radius:50%;color:#fff;cursor:pointer;display:grid;place-items:center}
+.gear svg{transition:transform .5s}.gear:hover svg{transform:rotate(90deg)}
+.cal{background:var(--glass-2);border-radius:16px;padding:16px;position:relative}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-head b{font:700 15px var(--fd)}
+.cal-nav{border:1px solid var(--glass-b);background:transparent;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1}
+.cal-nav:disabled{opacity:.3;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-wd{font:600 11px var(--fs);color:var(--ink-3);text-align:center;padding-bottom:2px}
+.cal-d{aspect-ratio:1;border-radius:8px;border:0;font:600 12px var(--fs);color:#fff;cursor:pointer;display:grid;place-items:center;font-variant-numeric:tabular-nums;transition:transform .12s}
+.cal-d.fut{background:rgba(255,255,255,.05);color:var(--ink-3);cursor:default}
+.cal-d.today{box-shadow:inset 0 0 0 2px #fff}
+.cal-d.sel{outline:2px solid #fff;outline-offset:2px}
+.cal-d:not(.fut):hover{transform:scale(1.1)}
+.cal-leg{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--ink-2)}
+.cal-leg i{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,#5B4A2E,#F5A524 60%,#FFD27A)}
+.dlrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px;background:var(--glass-2);border-radius:16px;padding:14px 16px}
+.dlrow p{flex:1;min-width:220px;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.dlrow select{font:500 14px var(--fs);padding:9px 10px;border-radius:10px;border:1px solid var(--glass-b);background:rgba(0,0,0,.25);color:#fff}
+.dlrow select option{color:#000}
+#scrim{position:fixed;inset:0;background:rgba(3,10,18,.45);z-index:8;opacity:0;pointer-events:none;transition:opacity .25s}
+#scrim.on{opacity:1;pointer-events:auto}
+#settings{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);z-index:9;transform:translateX(105%);transition:transform .3s ease;display:flex;flex-direction:column;background:rgba(9,24,36,.94);border-left:1px solid var(--glass-b);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+#settings.on{transform:none}
+.st-head{display:flex;justify-content:space-between;align-items:center;padding:20px 22px 12px}
+.st-head h3{font:800 22px var(--fd)}
+.st-close{border:0;background:rgba(255,255,255,.1);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
+.st-body{overflow:auto;padding:0 22px 20px;flex:1}
+.st-note{font-size:13px;line-height:1.5;color:#FFE3A6;background:rgba(245,165,36,.12);border:1px solid rgba(245,165,36,.35);padding:10px 12px;border-radius:12px}
+.st-sec{margin-top:20px}
+.st-sec h4{font:700 15px var(--fd);margin-bottom:4px}
+.fld{display:grid;grid-template-columns:1fr 140px;gap:4px 12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.fld label{font-size:14px}
+.fld small{grid-column:1/-1;font-size:12px;color:var(--ink-3);line-height:1.4}
+.inp{display:flex;align-items:center;background:rgba(0,0,0,.28);border:1px solid var(--glass-b);border-radius:10px;overflow:hidden}
+.inp input,.inp select{width:100%;min-width:0;background:transparent;border:0;color:#fff;font:600 14px var(--fs);padding:8px 10px;font-variant-numeric:tabular-nums;outline:0}
+.inp select option{color:#000}
+.inp span{font-size:12px;color:var(--ink-3);padding-right:10px;white-space:nowrap}
+.inp:focus-within{border-color:#F5A524}
+.fld.bad .inp{border-color:#FF6A3D}
+.st-foot{display:flex;gap:10px;padding:14px 22px 20px;border-top:1px solid var(--glass-b)}
+.st-foot .btn{flex:1;padding:11px 14px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);background:#fff;color:var(--texto);font:600 14px var(--fs);padding:10px 16px;border-radius:999px;opacity:0;transition:all .25s;z-index:10;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:#FF6A3D;color:#fff}
+.lab-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:5px;border-radius:16px;margin-bottom:16px;width:fit-content;max-width:100%}
+.lab-tabs button{border:0;background:transparent;color:#fff;font:600 14px var(--fs);padding:9px 14px;border-radius:12px;cursor:pointer}
+.lab-tabs button.on{background:#fff;color:var(--texto)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:16px}
+.exp{border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;position:relative}
+.exp.wide{grid-column:1/-1}
+.exp[hidden]{display:none}
+.exp-h{display:flex;gap:12px;align-items:flex-start}
+.exp-n{flex:none;width:34px;height:34px;border-radius:10px;background:rgba(245,165,36,.2);color:#FFD27A;font:800 15px var(--fd);display:grid;place-items:center}
+.exp-h h3{font:700 18px/1.25 var(--fd)}
+.exp-h p{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.45}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 16px;background:var(--glass-2);border-radius:14px;padding:12px 14px;align-items:end}
+.ctl{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.ctl .lab{display:flex;justify-content:space-between;gap:8px;color:var(--ink-2)}
+.ctl .lab b{color:#fff;font-variant-numeric:tabular-nums;text-align:right}
+.ctl input[type=range]{accent-color:#F5A524;width:100%}
+.ctl select{font:500 14px var(--fs);padding:7px 9px;border-radius:10px;border:1px solid var(--glass-b);background:rgba(0,0,0,.25);color:#fff}
+.ctl select option{color:#000}
+.tgl{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;padding:6px 0}
+.tgl input{position:absolute;opacity:0;width:0;height:0}
+.tgl i{flex:none;width:40px;height:22px;border-radius:11px;background:rgba(255,255,255,.2);position:relative;transition:.2s}
+.tgl i::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.tgl input:checked+i{background:#F5A524}
+.tgl input:checked+i::after{left:21px}
+.tgl input:focus-visible+i{outline:2px solid #fff;outline-offset:2px}
+.mwrap{position:relative}
+.mini{width:100%;height:210px;display:block;touch-action:none}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.res .stat strong{font-size:17px}
+.learn{font-size:14px;line-height:1.55;background:rgba(143,211,244,.1);border:1px solid rgba(143,211,244,.28);border-radius:14px;padding:10px 12px}
+.learn b{color:#CDEBFA}
+.mleg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.mleg span{display:inline-flex;gap:6px;align-items:center}
+.btn.sm{padding:9px 14px;font-size:14px;border-radius:12px}
+.status{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--fs);padding:5px 10px;border-radius:999px;border:1px solid}
+.st-ok{color:#BFF2D3;border-color:rgba(127,214,166,.6);background:rgba(127,214,166,.15)}
+.st-warn{color:#FFE3A6;border-color:rgba(245,208,106,.6);background:rgba(245,208,106,.15)}
+.st-bad{color:#FFD0C2;border-color:rgba(255,106,61,.7);background:rgba(255,106,61,.18)}
+.sizer{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;background:var(--glass-2);border-radius:14px;padding:14px}
+.panels{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;flex:1;min-width:200px}
+.pv{width:24px;height:36px;border-radius:4px;background:linear-gradient(135deg,#1F4E79,#2E6FA3);border:2px solid #9CC3E0;position:relative;overflow:hidden}
+.pv::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,255,255,.25) 6px 7px),repeating-linear-gradient(0deg,transparent 0 8px,rgba(255,255,255,.25) 8px 9px)}
+.bat{position:relative;width:70px;height:40px;border:2px solid #fff;border-radius:7px;overflow:hidden;flex:none}
+.bat::after{content:'';position:absolute;right:-7px;top:12px;width:5px;height:12px;background:#fff;border-radius:0 2px 2px 0}
+.bat b{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#7FD6A6,#BFF2D3)}
+.ecl{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.ecl svg{width:150px;height:150px;flex:none}
+.quiz{display:flex;flex-direction:column;gap:12px}
+.quiz-chips{display:flex;flex-wrap:wrap;gap:8px}
+.quiz-chips span{background:var(--glass-2);border-radius:999px;padding:6px 12px;font-size:13px}
+.quiz-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.score{font:800 26px var(--fd)}
+.skyswatch{height:70px;border-radius:14px;position:relative;overflow:hidden}
+.skyswatch i{position:absolute;width:34px;height:34px;border-radius:50%;left:70%;top:14px;filter:blur(2px)}
+main{transition:opacity .5s}
+body.studio{overflow:hidden}
+body.studio main,body.studio #dim{opacity:0!important;pointer-events:none}
+body.studio #c3d{cursor:grab}
+body.studio #c3d:active{cursor:grabbing}
+#hud{position:fixed;top:16px;right:16px;bottom:92px;width:min(390px,calc(100% - 32px));z-index:6;border-radius:20px;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:12px;transform:translateX(115%);transition:transform .45s ease;background:rgba(9,24,36,.72)}
+body.studio #hud{transform:none}
+.hud-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hud-h h3{font:800 20px var(--fd);margin-top:2px}
+.hud-views{display:flex;gap:6px;flex-wrap:wrap}
+.hud-views button{border:1px solid var(--glass-b);background:transparent;color:#fff;font:600 13px var(--fs);padding:7px 12px;border-radius:999px;cursor:pointer}
+.hud-views button.on{background:#fff;color:var(--texto)}
+.hud-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#hud .ctrls{grid-template-columns:1fr 1fr;padding:10px 12px}
+#hud .res{grid-template-columns:1fr 1fr}
+#hud .res .stat strong{font-size:15px}
+#hud .btn-studio{display:none}
+.therm-leg{display:none;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.therm-leg i{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,#3B82F6,#22D3EE,#FDE047,#F97316,#DC2626)}
+body.thermal .therm-leg{display:flex}
+.hud-hint{font-size:12px;color:var(--ink-3);text-align:center}
+@media (max-width:700px){#hud{top:auto;left:8px;right:8px;width:auto;bottom:80px;max-height:48vh}#hud .ctrls{grid-template-columns:1fr}}
+.flowcard{border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.flow-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.flow-ctl .btn{padding:9px 14px;font-size:14px;border-radius:12px}
+.flow-note{font-size:13px;color:var(--ink-2);margin-left:auto}
+.pipe{display:flex;align-items:center;gap:0}
+.node{flex:none;width:118px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:16px;border:1px solid transparent;background:var(--glass-2);color:#fff;cursor:pointer;font:600 12px var(--fs);text-align:center;transition:background .25s,border-color .25s,transform .25s}
+.node svg{width:40px;height:40px;color:#CDEBFA}
+.node b{font:700 13px/1.15 var(--fd)}
+.node span{font:600 12px var(--fs);color:#FFD27A;font-variant-numeric:tabular-nums;min-height:15px}
+.node.on{background:rgba(245,165,36,.2);border-color:rgba(245,165,36,.7);transform:translateY(-3px)}
+.node.on svg{color:#FFD27A}
+.node:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.link{flex:1;min-width:10px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);position:relative;overflow:hidden}
+.link::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(245,165,36,.0) 0 8px,rgba(245,165,36,.55) 8px 14px);background-size:28px 100%;animation:flowx .9s linear infinite;opacity:.35}
+.link.flow::after{opacity:1;background:repeating-linear-gradient(90deg,rgba(255,210,122,0) 0 6px,#FFD27A 6px 14px);background-size:28px 100%}
+.link.lt::after{background:repeating-linear-gradient(90deg,rgba(143,211,244,0) 0 8px,rgba(143,211,244,.7) 8px 14px);background-size:28px 100%}
+@keyframes flowx{to{background-position:28px 0}}
+.fdetail{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.fdetail h3{font:800 22px var(--fd);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.fdetail h3 small{font:600 12px var(--fs);color:#FFD27A;background:rgba(245,165,36,.15);border:1px solid rgba(245,165,36,.4);padding:3px 8px;border-radius:999px}
+.fdetail p{font-size:15px;line-height:1.6;color:var(--ink-2)}
+.fdetail p b{color:#fff}
+.fnow{background:rgba(0,0,0,.22);border:1px solid var(--glass-b);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.fnow .k{font-size:11px}
+.fnow code{font:600 15px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#fff;white-space:pre-wrap;word-break:break-word}
+.fnow .big2{font:800 30px var(--fd);color:#FFD27A;font-variant-numeric:tabular-nums}
+.fsim{font-size:12px;color:var(--ink-3)}
+@media (prefers-reduced-motion:reduce){.link::after{animation:none}}
+@media (max-width:900px){
+  .pipe{flex-direction:column;align-items:stretch}
+  .node{width:auto;flex-direction:row;justify-content:flex-start;text-align:left;padding:10px 12px;gap:12px}
+  .node span{margin-left:auto}
+  .link{width:4px;height:16px;min-width:0;flex:none;align-self:center}
+  .link::after{background:repeating-linear-gradient(180deg,rgba(245,165,36,0) 0 6px,rgba(245,165,36,.6) 6px 12px);background-size:100% 24px;animation:flowy .9s linear infinite}
+  .link.flow::after{background:repeating-linear-gradient(180deg,rgba(255,210,122,0) 0 6px,#FFD27A 6px 12px);background-size:100% 24px}
+  .fdetail{grid-template-columns:1fr}
+  .flow-note{margin-left:0}
+}
+@keyframes flowy{to{background-position:0 24px}}
+.brand-logo{width:40px;height:40px;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.brand-logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+.credits{max-width:1280px;margin:0 auto;padding:6vh clamp(16px,5vw,64px) 130px}
+.cred-wrap{border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px}
+.cred-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cred-head .brand-logo{width:56px;height:56px;border-radius:14px}
+.cred-head h2{font:800 clamp(24px,3vw,34px)/1.1 var(--fd)}
+.cred-head p{color:var(--ink-2);font-size:14px;margin-top:4px}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.person{background:var(--glass-2);border-radius:18px;padding:20px;display:flex;gap:16px;align-items:flex-start}
+.avatar{flex:none;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font:800 20px var(--fd);color:#1d1405}
+.person h3{font:700 18px/1.25 var(--fd)}
+.person .role{display:inline-flex;align-items:center;gap:6px;font:700 12px var(--fs);letter-spacing:.6px;text-transform:uppercase;margin:6px 0 8px;padding:4px 10px;border-radius:999px}
+.person .prog{font-size:13px;color:var(--ink-3)}
+.person ul{margin:10px 0 0 18px;font-size:14px;line-height:1.55;color:var(--ink-2)}
+.cred-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;border-top:1px solid var(--glass-b);padding-top:18px}
+.cred-meta div{font-size:13px;color:var(--ink-2);line-height:1.5}
+.cred-meta b{display:block;color:#fff;font:700 14px var(--fd)}
+.cred-foot{font-size:12px;color:var(--ink-3);text-align:center}
+@media (max-width:900px){
+  .hero-body{grid-template-columns:1fr;gap:20px;padding:10px 16px 140px}
+  .row1,.hist-grid{grid-template-columns:1fr}
+  .navlinks{display:none}
+  .hint{display:none}
+  .scrollhint{display:none}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion:reduce){.scrollhint svg,.chip i{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c3d"></canvas>
+<div id="dim"></div>
+<div id="err">No se pudo cargar la escena 3D (revisa la conexión).</div>
+
+<main>
+<!-- =================== HERO =================== -->
+<section class="hero" id="inicio">
+  <nav class="nav">
+    <div class="brand">
+      <div class="brand-logo" data-logo></div>
+      <div>Observatorio Solar<small>Campus Restrepo · Unillanos</small></div>
+    </div>
+    <div class="navr"><div class="navlinks glass"><a href="#inicio">Inicio</a><a href="#panel">Panel en vivo</a><a href="#historial">Historial</a><a href="#como-funciona">Cómo funciona</a><a href="#laboratorio">Laboratorio</a></div><button class="gear glass" id="gearBtn" aria-label="Configuración" title="Configuración"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button></div>
+  </nav>
+  <div class="hero-body" id="heroBody">
+    <div>
+      <span class="eyebrow glass">☀ Universidad de los Llanos · Grupo MACRYPT</span>
+      <h1>La energía del <span>sol</span>,<br>en tiempo real.</h1>
+      <p class="lead">Monitoreamos la radiación solar del Campus Restrepo en Villavicencio. Descubre cómo la luz que llega a la tierra se convierte en datos, y en energía.</p>
+      <div class="ctas"><a class="btn pri" href="#panel">Ver datos en vivo</a><a class="btn" href="#como-funciona">Aprender cómo funciona</a></div>
+    </div>
+    <div class="card glass">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="k">Irradiancia ahora</span><span class="chip"><i></i>Datos simulados</span></div>
+      <div class="big"><span id="g">0</span><small>W/m²</small></div>
+      <div class="meter"><b id="bar"></b></div>
+      <div class="stats">
+        <div class="stat"><span>Señal</span><strong id="ma">4.00 mA</strong></div>
+        <div class="stat"><span>Hora</span><strong id="hr">06:00</strong></div>
+        <div class="stat"><span>Fase</span><strong id="ph">—</strong></div>
+      </div>
+      <div class="equiv"><span>📱</span><span id="eq">—</span></div>
+    </div>
+  </div>
+  <a class="scrollhint" href="#panel">Sube al cielo<svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 7l5 5 5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg></a>
+</section>
+
+<!-- =================== PANEL EN VIVO =================== -->
+<section class="dash" id="panel">
+  <div class="sec-head">
+    <div>
+      <h2>Panel en vivo</h2>
+      <p>Lo que mide el sensor ahora mismo, comparado con lo que llegaría si el cielo estuviera completamente despejado.</p>
+    </div>
+    <div class="viewing glass" id="viewing"><span id="viewingTxt">Viendo otro día</span><button id="backToday">Volver a hoy</button></div>
+  </div>
+
+  <div class="row1">
+    <!-- Velocímetro -->
+    <div class="card glass gauge-wrap">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center"><span class="k">Irradiancia</span><button class="info" data-x="exG" aria-label="Qué es">i</button></div>
+      <div class="explain" id="exG" style="margin-top:8px">La <b>irradiancia</b> es la potencia del sol que llega a cada metro cuadrado, medida en vatios por metro cuadrado (W/m²). Al mediodía con cielo despejado, en Villavicencio puede pasar de 1000 W/m².</div>
+      <svg viewBox="0 0 260 168" id="gauge" aria-label="Velocímetro de irradiancia">
+        <defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#8FD3F4"/><stop offset=".55" stop-color="#F5A524"/><stop offset="1" stop-color="#FF6A3D"/></linearGradient></defs>
+        <path id="gTrack" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="16" stroke-linecap="round"/>
+        <path id="gArc" fill="none" stroke="url(#gg)" stroke-width="16" stroke-linecap="round"/>
+        <g id="gTicks"></g>
+        <g id="gNeedle"><path d="M130 136 L127 70 L130 52 L133 70Z" fill="#fff"/><circle cx="130" cy="136" r="8" fill="#fff"/><circle cx="130" cy="136" r="3.5" fill="#16323F"/></g>
+        <text x="130" y="122" text-anchor="middle" class="gval" id="gVal" style="display:none">0</text>
+      </svg>
+      <div style="font:800 44px var(--fd);font-variant-numeric:tabular-nums;margin-top:-6px"><span id="gNum">0</span><span style="font:600 15px var(--fs);color:var(--ink-2);margin-left:6px">W/m²</span></div>
+      <div class="zone"><i id="zDot"></i><span id="zTxt">—</span></div>
+      <div class="gsub">
+        <div class="stat"><span>Señal del sensor</span><strong id="gMa">4.00 mA</strong></div>
+        <div class="stat"><span>Cielo</span><strong id="gSky">—</strong></div>
+      </div>
+    </div>
+
+    <!-- Día solar -->
+    <div class="card glass chart-card" id="chartCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><span class="k">Día solar</span> <span style="color:var(--ink-2);font-size:13px;margin-left:6px" id="chartDate">hoy</span></div>
+        <div class="legend">
+          <span><i class="sw" style="background:#F5A524"></i>Medición</span>
+          <span><i class="sw" style="background:repeating-linear-gradient(90deg,#fff 0 5px,transparent 5px 8px)"></i>Cielo despejado (teórico)</span>
+          <span><i class="sw" style="height:10px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.45) 0 2px,transparent 2px 5px)"></i>Pérdida por nubes</span>
+        </div>
+      </div>
+      <svg id="chart"></svg>
+      <div class="tip" id="tip"></div>
+    </div>
+  </div>
+
+  <!-- Tarjetas -->
+  <div class="tiles">
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">Pico del día</span><span class="ic">⬆</span></div>
+      <div class="v" id="tPeak">—<small>W/m²</small></div>
+      <div class="note" id="tPeakN">—</div>
+    </div>
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">Energía acumulada</span><button class="info" data-x="exE" aria-label="Qué es">i</button></div>
+      <div class="v" id="tEnergy">—<small>kWh/m²</small></div>
+      <div class="explain" id="exE">Es el área bajo la curva naranja: toda la energía solar que ha caído sobre 1 m² desde el amanecer. También equivale a las <b>horas solares pico</b>, o sea, cuántas horas de sol “perfecto” (1000 W/m²) hubo.</div>
+      <div class="note" id="tEnergyN">—</div>
+    </div>
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">Índice de claridad</span><button class="info" data-x="exK" aria-label="Qué es">i</button></div>
+      <div class="v" id="tKt">—<small>%</small></div>
+      <div class="explain" id="exK">Compara la energía medida con la teórica de cielo despejado. 100 % = cielo limpio; valores bajos indican nubes, lluvia o un sensor sucio.</div>
+      <div class="note" id="tKtN">—</div>
+    </div>
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">El sol hoy</span><span class="ic">🌅</span></div>
+      <div class="v" id="tDay">—<small>h de luz</small></div>
+      <div class="note" id="tDayN">—</div>
+    </div>
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">Si hubiera un panel</span><button class="info" data-x="exP" aria-label="Qué es">i</button></div>
+      <div class="v" id="tPanel">—<small>kWh</small></div>
+      <div class="explain" id="exP">Panel de referencia de 1 m² con 20 % de eficiencia. El CO₂ evitado usa un factor aproximado de 0,126 kg por kWh para la red eléctrica colombiana (dato de referencia; se ajusta en la configuración).</div>
+      <div class="note" id="tPanelN">—</div>
+    </div>
+    <div class="tile glass">
+      <div class="tile-head"><span class="k">Ahorro estimado</span><span class="ic">💰</span></div>
+      <div class="v" id="tCop">—<small>COP</small></div>
+      <div class="note" id="tCopN">—</div>
+    </div>
+    <div class="tile glass soon">
+      <div class="tile-head"><span class="k">Temperatura</span><span class="chip mute">Sensor en camino</span></div>
+      <div class="v">-- <small>°C</small></div>
+      <div class="note">Espacio listo para el sensor de temperatura y humedad (ej. SHT31). Aquí también verás la sensación térmica.</div>
+    </div>
+    <div class="tile glass soon">
+      <div class="tile-head"><span class="k">Humedad relativa</span><span class="chip mute">Sensor en camino</span></div>
+      <div class="v">-- <small>%</small></div>
+      <div class="note">Con humedad y temperatura podremos calcular el punto de rocío y relacionar la humedad con las nubes.</div>
+    </div>
+  </div>
+
+  <!-- Historial -->
+  <div class="hist glass" id="historial">
+    <div class="sec-head" style="margin-bottom:12px">
+      <div><span class="k">Historial</span><p style="margin-top:4px;font-size:14px">Energía solar recibida por día. Toca una barra o un día del calendario para ver su curva arriba.</p></div>
+    </div>
+    <div class="hist-grid">
+      <div>
+        <div class="k" style="margin-bottom:6px;font-size:11px">Últimos 7 días</div>
+        <div style="position:relative"><svg id="hchart"></svg><div class="tip" id="htip"></div></div>
+      </div>
+      <div class="cal" id="cal">
+        <div class="cal-head"><button class="cal-nav" id="calPrev" aria-label="Mes anterior">‹</button><b id="calTitle">—</b><button class="cal-nav" id="calNext" aria-label="Mes siguiente">›</button></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-leg"><span>Menos sol</span><i></i><span>Más sol</span></div>
+        <div class="tip" id="ctip"></div>
+      </div>
+    </div>
+    <div class="dlrow">
+      <span class="k">Descargar datos</span>
+      <p>Fecha, hora, irradiancia (W/m²), señal (mA) y valor teórico, con el intervalo de lectura configurado.</p>
+      <select id="dlRange" aria-label="Rango a descargar"><option value="sel">Día seleccionado</option><option value="7">Últimos 7 días</option><option value="month">Mes del calendario</option></select>
+      <button class="btn pri" id="dlBtn">Descargar CSV</button>
+    </div>
+  </div>
+</section>
+<section class="dash" id="como-funciona" style="padding-top:4vh;padding-bottom:40px">
+  <div class="sec-head">
+    <div><h2>¿Cómo viaja el dato?</h2><p>Desde que la luz sale del sol hasta que aparece en tu pantalla, el dato cambia de forma ocho veces. Sigue el recorrido con los valores de este momento.</p></div>
+  </div>
+  <div class="flowcard glass">
+    <div class="flow-ctl">
+      <button class="btn pri" id="flPlay">⏸ Pausar recorrido</button>
+      <button class="btn" id="flPrev" aria-label="Paso anterior">‹ Anterior</button>
+      <button class="btn" id="flNext" aria-label="Paso siguiente">Siguiente ›</button>
+      <span class="flow-note">Toca cualquier etapa para verla en detalle</span>
+    </div>
+    <div class="pipe" id="pipe"></div>
+    <div class="fdetail">
+      <div><h3 id="fdT">—</h3><p id="fdP">—</p></div>
+      <div class="fnow"><span class="k">En este momento</span><div class="big2" id="fdV">—</div><code id="fdF">—</code><span class="fsim" id="fdS"></span></div>
+    </div>
+  </div>
+</section>
+<section class="dash" id="laboratorio" style="padding-top:4vh">
+  <div class="sec-head">
+    <div><h2>Laboratorio solar</h2><p>Cambia el clima, el panel o el sensor y mira qué pasa con la energía. Casi todos los experimentos comparan contra un día perfecto con cielo despejado en Villavicencio.</p></div>
+  </div>
+  <div class="lab-tabs glass" id="labTabs" role="tablist"></div>
+  <div class="exp-grid" id="labGrid"></div>
+</section>
+<footer class="credits" id="creditos">
+  <div class="cred-wrap glass">
+    <div class="cred-head">
+      <div class="brand-logo" data-logo></div>
+      <div><h2>Créditos</h2><p>Monitoreo de radiación solar en tiempo real · Campus Restrepo, Universidad de los Llanos</p></div>
+    </div>
+    <div class="people">
+      <article class="person">
+        <div class="avatar" style="background:linear-gradient(135deg,#8FD3F4,#4FA9E0)">YS</div>
+        <div>
+          <h3>Yeison Camilo Sanabria Ladino</h3>
+          <div class="prog">Ingeniería Electrónica</div>
+          <span class="role" style="background:rgba(143,211,244,.15);border:1px solid rgba(143,211,244,.45);color:#CDEBFA">🔧 Hardware</span>
+          <ul>
+            <li>Sensor de irradiancia SN-300AL (4–20 mA)</li>
+            <li>Circuito de adquisición y tarjeta PCB</li>
+            <li>Integración con la Raspberry Pi 4 y el convertidor ADC</li>
+          </ul>
+        </div>
+      </article>
+      <article class="person">
+        <div class="avatar" style="background:linear-gradient(135deg,#FFD27A,#F5A524)">JC</div>
+        <div>
+          <h3>Juan Camilo Céspedes Buitrago</h3>
+          <div class="prog">Ingeniería Electrónica</div>
+          <span class="role" style="background:rgba(245,165,36,.15);border:1px solid rgba(245,165,36,.5);color:#FFE3A6">💻 Software</span>
+          <ul>
+            <li>Plataforma web y paisaje 3D interactivo</li>
+            <li>Panel en vivo, historial y simulación de datos</li>
+            <li>Laboratorio solar, modo estudio y recorrido del dato</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+    <div class="cred-meta">
+      <div><b>Director</b>Mg. Omar Yesid Beltrán Gutiérrez</div>
+      <div><b>Codirector · Investigador principal</b>Mg. Javier Eduardo Martínez Baquero</div>
+      <div><b>Grupo de investigación</b>MACRYPT · Automatización Industrial / Electrónica Aplicada</div>
+      <div><b>Modalidad</b>Estudiante Participante en Proyecto de Proyección Social (EPPS)</div>
+    </div>
+    <div class="cred-foot">Universidad de los Llanos · Villavicencio, Meta · 2026</div>
+  </div>
+</footer>
+</main>
+
+<div id="scrim"></div>
+<aside id="settings" aria-label="Configuración" aria-hidden="true">
+  <div class="st-head"><h3>⚙ Configuración</h3><button class="st-close" id="stClose" aria-label="Cerrar">✕</button></div>
+  <div class="st-body" id="stBody">
+    <div class="st-note">Modo demostración: los cambios solo afectan esta vista. En la versión final se guardarán en la Raspberry Pi y pedirán clave de administrador.</div>
+  </div>
+  <div class="st-foot"><button class="btn" id="stReset">Restablecer</button><button class="btn pri" id="stApply">Aplicar cambios</button></div>
+</aside>
+<div class="toast" id="toast">Configuración aplicada</div>
+
+
+<aside id="hud" class="glass" aria-hidden="true" aria-label="Modo estudio">
+  <div class="hud-h"><div><span class="k">Modo estudio</span><h3>Instalación solar</h3></div><button class="st-close" id="hudExit" aria-label="Volver al laboratorio">✕</button></div>
+  <div class="hud-views"><button data-v="front">Frente</button><button data-v="side">Lado</button><button data-v="top">Desde arriba</button><button data-v="sun">Desde el sol</button></div>
+  <div class="hud-row"><label class="tgl"><input type="checkbox" id="hudThermal"><i></i><span>Vista térmica</span></label><span class="chip mute" id="hudN">1 panel</span></div>
+  <div class="therm-leg"><span>25 °C</span><i></i><span>70 °C</span></div>
+  <div id="hudRes"></div>
+  <div id="hudCtrls"></div>
+  <button class="btn pri" id="hudBack">← Volver al laboratorio</button>
+  <p class="hud-hint">Arrastra para girar · rueda para acercar · Esc para salir</p>
+</aside>
+<div class="timebar glass">
+  <button class="play" id="play" aria-label="Pausar o reproducir"><svg id="pi" width="16" height="16" viewBox="0 0 16 16"><path d="M4 2h3v12H4zM9 2h3v12H9z" fill="currentColor"/></svg></button>
+  <input id="slider" type="range" min="0" max="24" step="0.01" value="9" aria-label="Hora del día">
+  <span class="tlabel" id="tl">09:00</span>
+  <button class="speed" id="speed">×1</button>
+  <span class="hint">Hora simulada</span>
+</div>
+
+<script>
+/* ================= LOGO =================
+   Pega aquí el logo oficial de Unillanos como data URI (PNG o SVG en base64) o como ruta, p. ej. 'img/logo-unillanos.png'.
+   Mientras esté vacío se usa el ícono solar provisional. */
+const LOGO_SRC='data:image/png;base64,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';
+const LOGO_FALLBACK=`<svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="15" r="7" fill="#F5A524"/><g stroke="#F5A524" stroke-width="2.2" stroke-linecap="round"><path d="M17 2v3M17 25v3M4 15h3M27 15h3M7.8 5.8l2 2M24.2 22.2l2 2M7.8 24.2l2-2M24.2 7.8l2-2"/></g><path d="M2 32 L11 22 L16 27 L22 19 L32 32Z" fill="#2E5E4E"/><path d="M2 32h30" stroke="#1F7A9C" stroke-width="3"/></svg>`;
+document.querySelectorAll('[data-logo]').forEach(el=>{el.innerHTML=LOGO_SRC?`<img src="${LOGO_SRC}" alt="Universidad de los Llanos">`:LOGO_FALLBACK});
+/* ================= utilidades ================= */
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+const hex=h=>{h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]};
+const mix=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)];
+function hash(x,y){const s=Math.sin(x*127.1+y*311.7)*43758.5453;return s-Math.floor(s)}
+function noise(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  const a=hash(xi,yi),b=hash(xi+1,yi),c=hash(xi,yi+1),d=hash(xi+1,yi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function fbm(x,y){let s=0,a=.5,f=1;for(let i=0;i<5;i++){s+=a*noise(x*f,y*f);f*=2;a*=.5}return s/.97}
+const fmtH=h=>{h=((h%24)+24)%24;const hh=Math.floor(h),mm=Math.floor((h-hh)*60);return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')};
+const nf=(v,d=0)=>v.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ================= configuración (editable con el ⚙) ================= */
+const CFG_DEF={eff:20,area:1,phoneWh:15,co2:.126,tariff:850,gmax:2000,mamin:4,mamax:20,gain:1,offset:0,interval:5,z1:200,z2:600,z3:900};
+let CFG={...CFG_DEF};
+const cal=g=>g>0?Math.max(0,g*CFG.gain+CFG.offset):0;                 // calibración
+const toMA=g=>CFG.mamin+(CFG.mamax-CFG.mamin)*clamp(g,0,CFG.gmax)/CFG.gmax; // W/m² → mA
+
+/* ================= modelo solar (Villavicencio) =================
+   Posición del sol: ecuaciones NOAA. Cielo despejado: modelo de Haurwitz.
+   La "medición" = teórico × factor de nubes simulado (distinto cada día, más nublado en temporada de lluvias abr–nov). */
+const LAT=4.142*Math.PI/180, LON=-73.627, TZ=-5, STEP=5/60;
+function cosZ(n,h){
+  const g=2*Math.PI/365*(n-1+(h-12)/24);
+  const eot=229.18*(.000075+.001868*Math.cos(g)-.032077*Math.sin(g)-.014615*Math.cos(2*g)-.040849*Math.sin(2*g));
+  const dec=.006918-.399912*Math.cos(g)+.070257*Math.sin(g)-.006758*Math.cos(2*g)+.000907*Math.sin(2*g)-.002697*Math.cos(3*g)+.00148*Math.sin(3*g);
+  const tst=h*60+eot+4*LON-60*TZ, ha=(tst/4-180)*Math.PI/180;
+  return Math.sin(LAT)*Math.sin(dec)+Math.cos(LAT)*Math.cos(dec)*Math.cos(ha);
+}
+const clearSky=(n,h)=>{const c=cosZ(n,h);return c>0?1098*c*Math.exp(-.057/c):0};
+const SEASON=[0,0,.04,.12,.18,.2,.18,.15,.15,.16,.14,.05];
+function cloudF(D,h){
+  const slow=Math.pow(noise(h*1.6+D.seed*13.1,D.seed*.37),1.6), fast=noise(h*8+D.seed*5.3,D.seed*1.9);
+  return clamp(1-D.cover*1.35*slow-.08*D.cover*fast,.1,1.04);
+}
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const doy=d=>Math.round((d-new Date(d.getFullYear(),0,0))/864e5);
+const keyOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const CACHE=new Map();
+function getDay(date){
+  const k=keyOf(date);if(CACHE.has(k))return CACHE.get(k);
+  const d=new Date(date);d.setHours(0,0,0,0);
+  const D={date:d,key:k,doy:doy(d),seed:doy(d)+d.getFullYear()*400};
+  D.cover=clamp(.08+.45*hash(D.seed,4.2)+SEASON[d.getMonth()],0,.85);
+  D.pts=[];for(let i=0;i<=288;i++){const h=i*STEP,cs=clearSky(D.doy,h);D.pts.push({h,cs,g:cs*cloudF(D,h)})}
+  for(let m=0;m<1440;m++){const a=cosZ(D.doy,m/60),b=cosZ(D.doy,(m+1)/60);if(a<=0&&b>0)D.rise=m/60;if(a>0&&b<=0)D.set=m/60}
+  CACHE.set(k,D);return D;
+}
+const isToday=D=>D.key===keyOf(TODAY);
+const DTODAY=getDay(TODAY);
+const DAYS=[];for(let i=6;i>=0;i--){const d=new Date(TODAY);d.setDate(d.getDate()-i);DAYS.push(getDay(d))}
+const limitOf=D=>isToday(D)?H:24;
+const dayName=d=>d.toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'});
+function statsUpTo(D,hEnd){let e=0,ecs=0,pk=0,pkh=0;
+  for(const p of D.pts){if(p.h>hEnd)break;const g=cal(p.g);e+=g*STEP;ecs+=p.cs*STEP;if(g>pk){pk=g;pkh=p.h}}
+  return{kwh:e/1000,kwhCs:ecs/1000,peak:pk,peakH:pkh,kt:ecs>0?e/ecs:0}}
+const FX={scene:false,cloud:0,rain:0,smoke:0,eclipse:0}; // efectos del laboratorio sobre la escena
+const gToday=h=>cal(clearSky(DTODAY.doy,h)*cloudF(DTODAY,h))*(1-FX.eclipse);
+
+/* ================= estado ================= */
+let H=9, playing=true, speedIdx=0, shownG=0, sel=DTODAY, scrollP=0, scrollS=0;
+const SPEEDS=[[.25,'×1'],[1,'×4'],[.0625,'×¼']];
+let mx=0,my=0,tmx=0,tmy=0;
+addEventListener('pointermove',e=>{tmx=e.clientX/innerWidth*2-1;tmy=e.clientY/innerHeight*2-1});
+
+/* ================= cielo ================= */
+const SKY=[[0,'#0A1430','#1A2850'],[4.8,'#101C40','#2A3466'],[5.8,'#3C4C8C','#F2A07A'],[6.6,'#5E9FD6','#FFD3A1'],
+  [9,'#3F98D6','#A9DDF5'],[12,'#2F8FD3','#8FD3F4'],[15,'#3F98D6','#A9DDF5'],[17.2,'#5C9CD2','#FFD39A'],
+  [18.1,'#4E4888','#F7895A'],[18.9,'#1E2550','#5A3F70'],[20,'#0A1430','#1A2850'],[24,'#0A1430','#1A2850']].map(k=>[k[0],hex(k[1]),hex(k[2])]);
+function skyAt(h){for(let i=0;i<SKY.length-1;i++){const a=SKY[i],b=SKY[i+1];if(h>=a[0]&&h<=b[0]){const t=(h-a[0])/(b[0]-a[0]);return[mix(a[1],b[1],t),mix(a[2],b[2],t)]}}return[SKY[0][1],SKY[0][2]]}
+const P={nube:hex('#F5F8FB'),noche:hex('#08122A')};
+
+/* ================= escena 3D ================= */
+let B=null;
+function loadThree(cb){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload=cb;s.onerror=()=>{$('#err').style.display='block';document.body.style.background='linear-gradient(180deg,#2F8FD3,#8FD3F4)'};document.head.appendChild(s)}
+function terrainH(x,wz){
+  const t=clamp((-wz-8)/70,0,1);
+  const m=Math.pow(fbm(x*.03+10,wz*.03+5),1.6)*58*Math.pow(t,1.2)+t*6;
+  const plains=1.1+fbm(x*.07,wz*.07)*2.2;
+  const rx=Math.sin(wz*.06)*14+3,d=Math.abs(x-rx);
+  const river=(1-smooth(3,9,d))*4.6*(1-t);
+  const lake=(1-smooth(7,15,Math.hypot((x+16)*.8,wz-6)))*4.6;
+  return plains+m-Math.max(river,lake);
+}
+function initB(){
+  const T=THREE,canvas=$('#c3d');
+  const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new T.Scene(),camera=new T.PerspectiveCamera(50,1,.5,2000);
+  const skyU={top:{value:new T.Color()},bottom:{value:new T.Color()}};
+  scene.add(new T.Mesh(new T.SphereGeometry(900,32,16),new T.ShaderMaterial({uniforms:skyU,side:T.BackSide,depthWrite:false,fog:false,
+    vertexShader:'varying float vY;void main(){vec4 w=modelMatrix*vec4(position,1.0);vY=normalize(w.xyz).y;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:'uniform vec3 top;uniform vec3 bottom;varying float vY;void main(){gl_FragColor=vec4(mix(bottom,top,smoothstep(-0.02,0.55,vY)),1.0);}'})));
+  scene.fog=new T.Fog(0xffffff,70,340);
+  const OZ=-30,geo=new T.PlaneGeometry(280,190,140,95),pos=geo.attributes.position;
+  for(let i=0;i<pos.count;i++)pos.setZ(i,terrainH(pos.getX(i),-pos.getY(i)+OZ));
+  geo.rotateX(-Math.PI/2);const g=geo.toNonIndexed();g.computeVertexNormals();
+  const p=g.attributes.position,cols=new Float32Array(p.count*3),tmp=new T.Color();
+  const ramp=[[.7,'#C9B98A'],[1.7,'#6FA35A'],[4,'#4E8B4E'],[9,'#3A7048'],[18,'#2E5E4E'],[28,'#4F6B6E'],[99,'#93A9AB']];
+  for(let i=0;i<p.count;i+=3){const hy=(p.getY(i)+p.getY(i+1)+p.getY(i+2))/3;let c=ramp[ramp.length-1][1];
+    for(const r of ramp){if(hy<r[0]){c=r[1];break}}tmp.set(c);tmp.offsetHSL(0,0,(Math.random()-.5)*.04);
+    for(let k=0;k<3;k++){cols[(i+k)*3]=tmp.r;cols[(i+k)*3+1]=tmp.g;cols[(i+k)*3+2]=tmp.b}}
+  g.setAttribute('color',new T.BufferAttribute(cols,3));
+  const terrain=new T.Mesh(g,new T.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.95}));terrain.position.z=OZ;scene.add(terrain);
+  const wg=new T.PlaneGeometry(280,190,70,48);wg.rotateX(-Math.PI/2);
+  const water=new T.Mesh(wg,new T.MeshStandardMaterial({color:0x1F7A9C,roughness:.22,metalness:.3,transparent:true,opacity:.9,flatShading:true}));
+  water.position.set(0,0,OZ);scene.add(water);const wp=wg.attributes.position,wbase=Float32Array.from(wp.array);
+  // sol difuminado
+  function glowTex(stops){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),gr=x.createRadialGradient(128,128,0,128,128,128);
+    stops.forEach(s=>gr.addColorStop(s[0],s[1]));x.fillStyle=gr;x.fillRect(0,0,256,256);return new T.CanvasTexture(c)}
+  const sunPos=new T.Vector3();
+  const sp=(tex,s,o)=>{const m=new T.Sprite(new T.SpriteMaterial({map:tex,blending:T.AdditiveBlending,depthWrite:false,fog:false,transparent:true,opacity:o}));m.scale.set(s,s,1);m.userData={o,s};scene.add(m);return m};
+  const glows=[sp(glowTex([[0,'rgba(255,255,250,1)'],[.12,'rgba(255,250,230,.95)'],[.3,'rgba(255,235,190,.45)'],[.6,'rgba(255,215,150,.1)'],[1,'rgba(255,200,120,0)']]),70,1),
+               sp(glowTex([[0,'rgba(255,235,190,.7)'],[.35,'rgba(255,210,140,.22)'],[1,'rgba(255,190,110,0)']]),260,.9),
+               sp(glowTex([[0,'rgba(255,225,170,.35)'],[.5,'rgba(255,200,130,.08)'],[1,'rgba(255,180,100,0)']]),700,.8)];
+  const sunL=new T.DirectionalLight(0xffffff,1),hemi=new T.HemisphereLight(0xbfe6ff,0x2E5E4E,.5),amb=new T.AmbientLight(0x3a4a8a,.15);scene.add(sunL,hemi,amb);
+  // nubes: bajas (sobre el valle) + cielo alto (protagonistas al subir)
+  const cMat=new T.MeshStandardMaterial({color:0xF5F8FB,flatShading:true,roughness:1,transparent:true,opacity:.96});const cl=[];
+  function cloud(x,y,z,s){const grp=new T.Group();const n=5+Math.floor(Math.random()*5);
+    for(let k=0;k<n;k++){const m=new T.Mesh(new T.IcosahedronGeometry((3+Math.random()*4)*s,1),cMat);
+      m.position.set((k-n/2)*4.6*s+Math.random()*2,Math.random()*2.5*s*(1-Math.abs(k-n/2)/n),Math.random()*4*s);m.scale.y=.68;grp.add(m)}
+    grp.position.set(x,y,z);grp.userData.v=(1.5+Math.random()*3)*(.6+s*.3);scene.add(grp);cl.push(grp)}
+  for(let i=0;i<10;i++)cloud(-170+Math.random()*340,38+Math.random()*22,-60-Math.random()*120,1);
+  for(let i=0;i<34;i++){const z=-80-Math.random()*360;cloud(-260+Math.random()*520,85+Math.random()*120+(-z)*.15,z,1.4+Math.random()*1.8)}
+  /* ================= MODO ESTUDIO (instalación solar) ================= */
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;terrain.receiveShadow=true;
+  sunL.shadow.mapSize.set(2048,2048);{const sc=sunL.shadow.camera;sc.left=-28;sc.right=28;sc.top=28;sc.bottom=-28;sc.near=1;sc.far=240}
+  sunL.shadow.bias=-.0004;sunL.shadow.normalBias=.03;
+  const SPOT=new T.Vector3(-32,terrainH(-32,22),22);
+  // Vegetación: árboles en la llanura y las laderas bajas + palmas de moriche cerca del agua
+  {const dm=new T.Object3D(),N=460,NP=90;
+    const trunks=new T.InstancedMesh(new T.CylinderGeometry(.18,.28,1,5),new T.MeshStandardMaterial({color:0x6B4F3A,flatShading:true}),N);
+    const crowns=new T.InstancedMesh(new T.IcosahedronGeometry(1,0),new T.MeshStandardMaterial({color:0xffffff,flatShading:true,roughness:.9}),N);
+    const greens=['#2F6B3A','#3E7D45','#4C8F4A','#2A5E3A','#5A9A4E','#356F3C'].map(c=>new T.Color(c));
+    let k=0,tries=0;
+    while(k<N&&tries<30000){tries++;const x=-135+Math.random()*270,z=-115+Math.random()*160,h=terrainH(x,z);
+      if(h<1.6||h>22)continue;if(Math.hypot(x-SPOT.x,z-SPOT.z)<24)continue;if(z>20&&Math.abs(x)<22)continue;
+      const slope=clamp((-z-8)/70,0,1);if(Math.random()>.25+slope*1.3)continue;
+      const s=1.5+Math.random()*1.8,th=1.4+Math.random()*1.6;
+      dm.rotation.set(0,Math.random()*6.28,0);dm.position.set(x,h+th/2-.2,z);dm.scale.set(1,th,1);dm.updateMatrix();trunks.setMatrixAt(k,dm.matrix);
+      dm.position.set(x,h+th+s*.55,z);dm.scale.set(s,s*(.85+Math.random()*.5),s);dm.updateMatrix();crowns.setMatrixAt(k,dm.matrix);
+      crowns.setColorAt(k,greens[Math.floor(Math.random()*greens.length)]);k++}
+    trunks.count=k;crowns.count=k;trunks.castShadow=crowns.castShadow=true;crowns.receiveShadow=true;scene.add(trunks,crowns);
+    const pt=new T.InstancedMesh(new T.CylinderGeometry(.12,.18,1,5),new T.MeshStandardMaterial({color:0x8A7458,flatShading:true}),NP);
+    const pc=new T.InstancedMesh(new T.IcosahedronGeometry(1,0),new T.MeshStandardMaterial({color:0x3F7F3A,flatShading:true}),NP);
+    k=0;tries=0;
+    while(k<NP&&tries<30000){tries++;const z=-40+Math.random()*90,rx=Math.sin(z*.06)*14+3,x=rx+(Math.random()<.5?-1:1)*(7+Math.random()*16),h=terrainH(x,z);
+      if(h<1.5||h>4)continue;if(Math.hypot(x-SPOT.x,z-SPOT.z)<20)continue;if(z>25&&Math.abs(x)<20)continue;
+      const th=5+Math.random()*3;dm.rotation.set(0,Math.random()*6.28,0);
+      dm.position.set(x,h+th/2-.2,z);dm.scale.set(1,th,1);dm.updateMatrix();pt.setMatrixAt(k,dm.matrix);
+      dm.position.set(x,h+th+.2,z);dm.scale.set(1.9,.55,1.9);dm.updateMatrix();pc.setMatrixAt(k,dm.matrix);k++}
+    pt.count=k;pc.count=k;pt.castShadow=pc.castShadow=true;scene.add(pt,pc)}
+  scene.add(sunL.target);sunL.target.position.copy(SPOT);
+  const ST={built:false,grp:new T.Group(),key:'',obKey:'',slots:[],tex:{}};ST.grp.visible=false;scene.add(ST.grp);
+  const PW=1.8,PD=1.1;
+  function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.anisotropy=4;return t}
+  function panelTex(type){if(ST.tex[type])return ST.tex[type];
+    return ST.tex[type]=canvasTex(512,320,(x,w,h)=>{x.fillStyle={mono:'#0E1626',poli:'#1F4E8C',thin:'#1B1E25'}[type];x.fillRect(0,0,w,h);
+      if(type==='poli')for(let i=0;i<4000;i++){x.fillStyle=`rgba(${60+Math.random()*60|0},${110+Math.random()*60|0},${190+Math.random()*50|0},.35)`;x.fillRect(Math.random()*w,Math.random()*h,3+Math.random()*5,2+Math.random()*4)}
+      if(type==='thin'){x.strokeStyle='rgba(255,255,255,.07)';for(let y=0;y<h;y+=5){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke()}}
+      else{const cols=10,rows=6;x.strokeStyle=type==='mono'?'rgba(150,170,200,.4)':'rgba(220,230,245,.5)';x.lineWidth=2;
+        for(let i=1;i<cols;i++){x.beginPath();x.moveTo(i*w/cols,0);x.lineTo(i*w/cols,h);x.stroke()}
+        for(let j=1;j<rows;j++){x.beginPath();x.moveTo(0,j*h/rows);x.lineTo(w,j*h/rows);x.stroke()}}
+      x.strokeStyle='#C9D1D9';x.lineWidth=12;x.strokeRect(6,6,w-12,h-12)})}
+  const dirtTex=canvasTex(512,320,(x,w,h)=>{for(let i=0;i<900;i++){const r=3+Math.random()*16,yy=Math.pow(Math.random(),.6)*h;
+      x.fillStyle=`rgba(${120+Math.random()*30|0},${92+Math.random()*25|0},60,${.08+Math.random()*.18})`;x.beginPath();x.arc(Math.random()*w,yy,r,0,7);x.fill()}
+    const g=x.createLinearGradient(0,h*.65,0,h);g.addColorStop(0,'rgba(130,100,65,0)');g.addColorStop(1,'rgba(130,100,65,.65)');x.fillStyle=g;x.fillRect(0,0,w,h)});
+  const M={frame:new T.MeshStandardMaterial({color:0xA7B0BA,metalness:.6,roughness:.4}),leg:new T.MeshStandardMaterial({color:0x8C959F,metalness:.5,roughness:.5}),
+    dirt:new T.MeshStandardMaterial({map:dirtTex,transparent:true,opacity:0,depthWrite:false,roughness:1}),therm:new T.MeshBasicMaterial({color:0x3B82F6})};
+  const PM={};const pm=type=>PM[type]||(PM[type]=new T.MeshStandardMaterial({map:panelTex(type),metalness:.25,roughness:.3}));
+  function labelSprite(){const c=document.createElement('canvas');c.width=640;c.height=128;const tex=new T.CanvasTexture(c);
+    const sp=new T.Sprite(new T.SpriteMaterial({map:tex,depthTest:false,transparent:true,fog:false}));sp.scale.set(5,1,1);sp.renderOrder=10;sp.userData={c,tex,txt:''};return sp}
+  function setLabel(sp,txt){if(sp.userData.txt===txt)return;sp.userData.txt=txt;const c=sp.userData.c,x=c.getContext('2d');x.clearRect(0,0,640,128);
+    x.font='600 40px Inter,system-ui,sans-serif';const w=Math.min(620,x.measureText(txt).width+56),x0=(640-w)/2,r=30;
+    x.fillStyle='rgba(9,26,38,.82)';x.beginPath();x.moveTo(x0+r,14);x.lineTo(x0+w-r,14);x.arcTo(x0+w,14,x0+w,64,r);x.arcTo(x0+w,114,x0+w-r,114,r);x.lineTo(x0+r,114);x.arcTo(x0,114,x0,64,r);x.arcTo(x0,14,x0+r,14,r);x.fill();
+    x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,320,66);sp.userData.tex.needsUpdate=true}
+  function makePanel(type){const tilt=new T.Group();
+    const back=new T.Mesh(new T.BoxGeometry(PW,.04,PD),M.frame);back.castShadow=true;back.receiveShadow=true;tilt.add(back);
+    const top=new T.Mesh(new T.PlaneGeometry(PW-.02,PD-.02).rotateX(-Math.PI/2),pm(type));top.position.y=.021;top.receiveShadow=true;tilt.add(top);
+    const dirt=new T.Mesh(new T.PlaneGeometry(PW-.02,PD-.02).rotateX(-Math.PI/2),M.dirt);dirt.position.y=.024;tilt.add(dirt);
+    tilt.userData.top=top;return tilt}
+  function buildArray(n,type){if(ST.arr)ST.grp.remove(ST.arr);
+    const yaw=new T.Group();ST.arr=yaw;ST.slots=[];const rows=Math.ceil(n/4);
+    for(let i=0;i<n;i++){const r=Math.floor(i/4),ci=i%4,cn=r===rows-1?n-r*4:4;
+      const slot=new T.Group();slot.position.set((ci-(cn-1)/2)*2.05,0,-r*2.8);
+      const post=new T.Mesh(new T.CylinderGeometry(.05,.06,2.4,8),M.leg);post.position.y=-.15;post.castShadow=true;slot.add(post);
+      const tilt=makePanel(type);tilt.position.y=1.05;slot.add(tilt);slot.userData.tilt=tilt;yaw.add(slot);ST.slots.push(slot)}
+    yaw.position.copy(SPOT);ST.rows=rows;ST.grp.add(yaw)}
+  function buildObstacle(ob,d,az){if(ST.obst){ST.grp.remove(ST.obst);ST.obst=null}if(!ob||ob==='none')return;
+    const dc=ob==='bld'?d+5:d,g=new T.Group(),a=az*Math.PI/180,x=SPOT.x+Math.sin(a)*dc,z=SPOT.z-Math.cos(a)*dc;g.position.set(x,terrainH(x,z),z);
+    if(ob==='tree'){const tr=new T.Mesh(new T.CylinderGeometry(.25,.35,3.6,7),new T.MeshStandardMaterial({color:0x6B4F3A,flatShading:true}));tr.position.y=1.8;tr.castShadow=true;g.add(tr);
+      const cm=new T.MeshStandardMaterial({color:0x3E7D45,flatShading:true});
+      [[0,5.2,0,2.8],[1.2,4.6,.6,2],[-1.1,4.8,-.5,2.1],[.2,6.6,.2,1.9]].forEach(([px,py,pz,r])=>{const s=new T.Mesh(new T.IcosahedronGeometry(r,1),cm);s.position.set(px,py,pz);s.castShadow=true;g.add(s)})}
+    else if(ob==='bld'){const tex=canvasTex(256,256,(x,w,h)=>{x.fillStyle='#D9D2C5';x.fillRect(0,0,w,h);x.fillStyle='#5B7A93';for(let i=0;i<6;i++)for(let j=0;j<5;j++)x.fillRect(12+i*40,14+j*48,24,30)});
+      const b=new T.Mesh(new T.BoxGeometry(20,15,10),new T.MeshStandardMaterial({map:tex,roughness:.9}));b.position.y=7.5;b.rotation.y=Math.PI-a;b.castShadow=true;b.receiveShadow=true;g.add(b)}
+    else{const p=new T.Mesh(new T.CylinderGeometry(.2,.25,6,8),M.leg);p.position.y=3;p.castShadow=true;g.add(p)}
+    ST.obst=g;ST.grp.add(g)}
+  function makePts(n,color,size){const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(n*3),3));
+    const p=new T.Points(g,new T.PointsMaterial({color,size,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,fog:false}));p.frustumCulled=false;ST.grp.add(p);return p}
+  function buildStatic(){
+    const sg=new T.Group();
+    const pole=new T.Mesh(new T.CylinderGeometry(.05,.05,2.6,8),M.leg);pole.position.y=.8;
+    const body=new T.Mesh(new T.CylinderGeometry(.12,.12,.16,20),new T.MeshStandardMaterial({color:0xD0D5DA,metalness:.7,roughness:.3}));body.position.y=2.17;
+    const dome=new T.Mesh(new T.SphereGeometry(.09,20,10,0,Math.PI*2,0,Math.PI/2),new T.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.45,roughness:.05}));dome.position.y=2.25;
+    const plate=new T.Mesh(new T.CylinderGeometry(.2,.2,.02,24),M.frame);plate.position.y=2.09;
+    const rpi=new T.Mesh(new T.BoxGeometry(.35,.25,.12),new T.MeshStandardMaterial({color:0x2E7D4F,roughness:.6}));rpi.position.set(0,1.2,.08);
+    [pole,body,rpi].forEach(m=>m.castShadow=true);sg.add(pole,body,dome,plate,rpi);
+    ST.sensorLabel=labelSprite();ST.sensorLabel.position.set(0,3.2,0);sg.add(ST.sensorLabel);ST.sg=sg;ST.grp.add(sg);
+    const bg=new T.Group();const bat=new T.Mesh(new T.BoxGeometry(.7,.9,.45),new T.MeshStandardMaterial({color:0x2B3440,roughness:.5}));bat.position.y=.45;bat.castShadow=true;
+    ST.batLed=new T.Mesh(new T.BoxGeometry(.5,.08,.02),new T.MeshBasicMaterial({color:0x7FD6A6}));ST.batLed.position.set(0,.7,.235);ST.batPed=new T.Mesh(new T.CylinderGeometry(.08,.1,1,6),new T.MeshStandardMaterial({color:0x8B5E3C}));bg.add(bat,ST.batLed,ST.batPed);ST.batG=bg;ST.grp.add(bg);
+    const house=new T.Group();
+    const walls=new T.Mesh(new T.BoxGeometry(3.2,2.4,3),new T.MeshStandardMaterial({color:0xF1E6D2,roughness:.9}));walls.position.y=1.2;walls.castShadow=true;walls.receiveShadow=true;
+    const roof=new T.Mesh(new T.ConeGeometry(2.6,1.5,4),new T.MeshStandardMaterial({color:0xB5523B,flatShading:true}));roof.position.y=3.15;roof.rotation.y=Math.PI/4;roof.castShadow=true;
+    house.add(walls,roof);
+    {const wood=new T.MeshStandardMaterial({color:0x8B5E3C,roughness:.9,flatShading:true});
+      ST.deck=new T.Mesh(new T.BoxGeometry(4.6,.22,4.4),wood);ST.deck.position.set(0,-.11,.3);ST.deck.castShadow=true;ST.deck.receiveShadow=true;house.add(ST.deck);
+      ST.posts=[[-2,-1.8],[2,-1.8],[-2,2.3],[2,2.3],[0,2.3],[0,-1.8]].map(([x,z])=>{const p=new T.Mesh(new T.CylinderGeometry(.13,.15,1,6),wood);p.position.set(x,0,z);p.castShadow=true;house.add(p);return p});
+      const rail=new T.Mesh(new T.BoxGeometry(4.6,.08,.08),wood);rail.position.set(0,.9,2.45);house.add(rail);ST.rail=rail;
+      ST.steps=new T.Mesh(new T.BoxGeometry(.9,.12,2.2),wood);ST.steps.position.set(0,-.6,3.6);ST.steps.rotation.x=.45;house.add(ST.steps)}
+    ST.win=new T.MeshStandardMaterial({color:0x334455,emissive:0xFFC966,emissiveIntensity:0});
+    [[-.8,1.3,1.51],[.8,1.3,1.51]].forEach(([x,y,z])=>{const w=new T.Mesh(new T.PlaneGeometry(.7,.6),ST.win);w.position.set(x,y,z);house.add(w)});
+    const door=new T.Mesh(new T.PlaneGeometry(.6,1.2),new T.MeshStandardMaterial({color:0x7A4E32}));door.position.set(0,.6,1.511);house.add(door);
+    ST.houseLabel=labelSprite();ST.houseLabel.position.set(0,4.7,0);house.add(ST.houseLabel);ST.house=house;ST.grp.add(house);
+    ST.arrLabel=labelSprite();ST.grp.add(ST.arrLabel);
+    ST.line=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(),new T.Vector3()]),new T.LineBasicMaterial({color:0x222222}));ST.line.frustumCulled=false;ST.grp.add(ST.line);
+    ST.ray=makePts(160,0xFFE08A,.16);ST.rayU=Float32Array.from({length:160},()=>Math.random());ST.rayOff=Array.from({length:160},()=>[(Math.random()-.5)*4,(Math.random()-.5)*3]);
+    ST.en=makePts(50,0x7FD6A6,.2);ST.enU=Float32Array.from({length:50},()=>Math.random());
+    ST.built=true;layoutStatic(90)}
+  // Ubica casa, batería y sensor en diagonales opuestas al obstáculo para que nunca se crucen
+  function atAz(az,d){const a=az*Math.PI/180,x=SPOT.x+Math.sin(a)*d,z=SPOT.z-Math.cos(a)*d;return new T.Vector3(x,terrainH(x,z),z)}
+  function layoutStatic(obAz){const hAz=obAz+135,sAz=obAz-135;
+    const hp=atAz(hAz,15);ST.house.position.copy(hp);ST.house.rotation.y=0; // puerta hacia el sur: de espaldas a la cordillera
+    // Si la casa cae en el agua se vuelve palafito (casa sobre pilotes), como las de las orillas de los ríos llaneros
+    const gh=hp.y,wet=gh<1.3,baseY=wet?1.9:gh;ST.house.position.y=baseY;
+    const L=baseY-gh+.6;ST.posts.forEach(p=>{p.visible=wet;p.scale.y=L;p.position.y=-L/2});ST.deck.visible=wet;ST.rail.visible=wet;ST.steps.visible=wet;
+    const bp=atAz(hAz,7),bg0=bp.y;bp.y=Math.max(bg0,1.2);ST.batG.position.copy(bp);
+    const bl=bp.y-bg0+.3;ST.batPed.visible=bp.y>bg0+.05;ST.batPed.scale.y=bl;ST.batPed.position.y=-bl/2;hp.y=baseY;
+    ST.sg.position.copy(atAz(sAz,4.5));
+    const p0=atAz(hAz,1.6);p0.y+=.15;
+    ST.path=[p0,bp.clone().add(new T.Vector3(0,.15,0)),hp.clone().add(new T.Vector3(0,.15,0))];
+    ST.line.geometry.setFromPoints(ST.path)}
+  const tmpV=new T.Vector3(),sunDirV=new T.Vector3(),stPos=new T.Vector3(),stTgt=new T.Vector3();
+  function polyAt(u){const P=ST.path,L0=P[0].distanceTo(P[1]),L1=P[1].distanceTo(P[2]),d=u*(L0+L1);
+    return d<=L0?tmpV.copy(P[0]).lerp(P[1],d/Math.max(L0,1e-6)):tmpV.copy(P[1]).lerp(P[2],(d-L0)/Math.max(L1,1e-6))}
+  const lerpA=(a,b,k)=>{let d=((b-a)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI;return a+d*k};
+  const THC=['#3B82F6','#22D3EE','#FDE047','#F97316','#DC2626'].map(hex);
+  function thermColor(tc){const k=clamp((tc-25)/45,0,1)*4,i=Math.min(3,Math.floor(k));return c3(mix(THC[i],THC[i+1],k-i))}
+  function studioUpdate(dt){
+    if(!ST.built)buildStatic();
+    const st=FREE.st||{},p=FREE.p||PS({}),n=point(p,H),N=Math.max(1,DIM_N|0),type=p.type;
+    if(N+type!==ST.key){ST.key=N+type;buildArray(N,type)}
+    const ok=(st.ob||'none')+'|'+st.dist+'|'+st.dir;if(ok!==ST.obKey){ST.obKey=ok;buildObstacle(st.ob,+st.dist,+st.dir);layoutStatic(st.ob&&st.ob!=='none'?+st.dir:90)}
+    const s=sunAt(DTODAY.doy,H,4.142,LON),er=s.el*Math.PI/180;
+    sunDirV.set(Math.sin(s.az)*Math.cos(er),Math.sin(er),-Math.cos(s.az)*Math.cos(er));
+    let yaw=Math.PI-p.paz*Math.PI/180,beta=p.tilt*Math.PI/180;
+    if(p.tracker){if(s.el>0){yaw=Math.PI-s.az;beta=Math.PI/2-er}else beta=0}
+    ST.arr.rotation.y=lerpA(ST.arr.rotation.y,yaw,Math.min(1,dt*3));
+    ST.slots.forEach(sl=>{const tl=sl.userData.tilt;tl.rotation.x+=(beta-tl.rotation.x)*Math.min(1,dt*3);tl.userData.top.material=STUDIO.thermal?M.therm:pm(type)});
+    M.dirt.opacity=clamp(p.dirt*2.6,0,.85);
+    if(STUDIO.thermal)M.therm.color.copy(thermColor(n.tc));
+    const pwTot=n.pw*PW*PD*N;STUDIO.pw=pwTot;
+    setLabel(ST.sensorLabel,`Sensor · ${nf(Math.round(n.ghiS))} W/m² · ${toMA(n.ghiS).toFixed(2)} mA`);
+    ST.arrLabel.position.set(SPOT.x,SPOT.y+3.3,SPOT.z-(ST.rows-1)*1.4);
+    setLabel(ST.arrLabel,STUDIO.thermal?`🌡 ${Math.round(n.tc)} °C · ${nf(Math.round(pwTot))} W`:`☀ ${nf(Math.round(n.poa))} W/m² · ${nf(Math.round(pwTot))} W`);
+    setLabel(ST.houseLabel,pwTot>5?`🏠 Recibe ${nf(Math.round(pwTot))} W`:'🏠 Sin generación');
+    ST.win.emissiveIntensity=clamp(pwTot/(N*250),0,1)*1.6;ST.batLed.material.color.setHex(pwTot>5?0x7FD6A6:0x5A6B80);
+    const bk=clamp(n.beam/850,0,1);ST.ray.material.opacity=s.el>0&&n.beam>5?.2+.7*bk:0;
+    {const a=ST.ray.geometry.attributes.position.array,u=ST.rayU,o=ST.rayOff;
+      for(let i=0;i<u.length;i++){u[i]+=dt*(.45+.45*bk);if(u[i]>1)u[i]-=1;const L=28*(1-u[i]);
+        a[i*3]=SPOT.x+o[i][0]+sunDirV.x*L;a[i*3+1]=SPOT.y+1.1+sunDirV.y*L;a[i*3+2]=SPOT.z+o[i][1]-(ST.rows-1)*1.4+sunDirV.z*L}
+      ST.ray.geometry.attributes.position.needsUpdate=true}
+    const ek=clamp(pwTot/(N*200),0,1);ST.en.material.opacity=pwTot>2?.45+.55*ek:0;
+    {const a=ST.en.geometry.attributes.position.array,u=ST.enU;for(let i=0;i<u.length;i++){u[i]+=dt*(.06+.3*ek);if(u[i]>1)u[i]-=1;const v=polyAt(u[i]);a[i*3]=v.x;a[i*3+1]=v.y+.06;a[i*3+2]=v.z}
+      ST.en.geometry.attributes.position.needsUpdate=true}
+    const G=STUDIO.goal;if(G){const k=Math.min(1,dt*3);STUDIO.azC=lerpA(STUDIO.azC,G.azC,k);STUDIO.el+=(G.el-STUDIO.el)*k;STUDIO.R+=(G.R-STUDIO.R)*k;
+      if(Math.abs(G.el-STUDIO.el)<.002&&Math.abs(G.R-STUDIO.R)<.02)STUDIO.goal=null}
+    stTgt.set(SPOT.x,SPOT.y+1.2,SPOT.z-(ST.rows-1)*1.4);
+    stPos.set(Math.sin(STUDIO.azC)*Math.cos(STUDIO.el),Math.sin(STUDIO.el),-Math.cos(STUDIO.azC)*Math.cos(STUDIO.el)).multiplyScalar(STUDIO.R).add(stTgt);
+    const gyc=terrainH(stPos.x,stPos.z)+1.2;if(stPos.y<gyc)stPos.y=gyc;
+    return{pos:stPos,tgt:stTgt,sunDir:sunDirV}
+  }
+  const sunStudio=new T.Vector3();
+  function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+  resize();addEventListener('resize',resize);
+  const c3=a=>new T.Color(a[0]/255,a[1]/255,a[2]/255);
+  const look=new T.Vector3();
+  // Lluvia como trazos finos (LineSegments): siempre 1 px de grosor, se ven bien de lejos y de cerca
+  let rain=null;const RN=3000;
+  function rainUpdate(dt,rn){
+    if(rn<.01){if(rain)rain.visible=false;return}
+    if(!rain){const pa=new Float32Array(RN*6);
+      for(let i=0;i<RN;i++){const x=-70+Math.random()*140,y=-30+Math.random()*70,z=-90+Math.random()*90;pa.set([x,y,z,x+.18,y+1.5,z],i*6)}
+      const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(pa,3));
+      rain=new T.LineSegments(g,new T.LineBasicMaterial({color:0xD6E6F2,transparent:true,opacity:.5,depthWrite:false,fog:false}));rain.frustumCulled=false;scene.add(rain)}
+    rain.visible=true;rain.position.copy(camera.position);rain.material.opacity=.2+.45*rn;
+    const a=rain.geometry.attributes.position.array,sp=60*dt;
+    for(let i=0;i<RN;i++){const j=i*6;a[j+1]-=sp;a[j+4]-=sp;if(a[j+1]<-30){a[j+1]+=70;a[j+4]+=70}}
+    rain.geometry.attributes.position.needsUpdate=true;
+  }
+  function update(dt,t,el,sky,light,warmth,D){
+    const ec=FX.eclipse,sm=FX.scene?FX.smoke:0,cc=FX.scene?FX.cloud:0,rn=FX.scene?FX.rain:0,storm=Math.max(cc*.8,rn);
+    sky=[mix(mix(sky[0],P.noche,ec*.8),hex('#5E6B78'),storm*.6),mix(mix(mix(sky[1],hex('#D9A86C'),sm*.75),P.noche,ec*.7),hex('#8A949C'),storm*.55)];
+    light=light*(1-ec*.7)*(1-storm*.35);
+    // arco del sol entre amanecer y atardecer reales
+    const a=Math.PI*clamp((H-D.rise)/(D.set-D.rise),-.15,1.15);
+    sunPos.set(-Math.cos(a)*320,Math.sin(a)*230-10,-480);
+    const tint=c3(mix(hex('#FF8A4A'),hex('#FFFFFF'),smooth(0,.4,el))),vis=smooth(-.12,.03,el),big=1+(1-smooth(0,.35,el))*.6;
+    glows.forEach((g,i)=>{g.position.copy(sunPos);g.material.color.copy(tint);g.material.opacity=g.userData.o*vis*(1-ec*.9)*(1-storm*.8);const s=g.userData.s*(i?big:1);g.scale.set(s,s,1)});
+    sunL.position.copy(sunPos);sunL.intensity=(Math.max(0,el)*1.35+.04)*(1-ec*.95)*(1-storm*.65);
+    sunL.color.copy(c3(mix(hex('#FFA060'),hex('#FFF6E5'),smooth(0,.5,el))));
+    hemi.color.copy(c3(sky[0]));hemi.intensity=.18+.5*light;amb.intensity=.12+(1-light)*.1;
+    skyU.top.value.copy(c3(sky[0]));skyU.bottom.value.copy(c3(sky[1]));scene.fog.color.copy(c3(sky[1]));
+    scene.fog.far=lerp(lerp(340,1400,scrollS),130,Math.max(sm*.85,rn*.5));scene.fog.near=lerp(70,6,Math.max(sm,rn*.5));
+    for(let i=0;i<wp.count;i++){const x=wbase[i*3],z=wbase[i*3+2];wp.setY(i,Math.sin(x*.25+t*1.4)*.07+Math.cos(z*.3+t*1.1)*.07)}wp.needsUpdate=true;
+    cMat.color.copy(c3(mix(mix(mix(P.nube,sky[1],.12+warmth*.35),P.noche,(1-light)*.75),hex('#6F7B86'),storm*.6)));
+    cl.forEach(g=>{g.position.x+=g.userData.v*dt;if(g.position.x>280)g.position.x=-280});
+    // cámara: al bajar en la página, sube hacia el cielo
+    const s=scrollS, e=s*s*(3-2*s);
+    camera.position.set(mx*7*(1-e*.5),lerp(11,95,e)-my*3,lerp(56,20,e));
+    look.set(0,lerp(8,150,e),lerp(-30,-260,e));camera.lookAt(look);
+    // ---- modo estudio: la cámara baja a la instalación y el sol pasa a su posición real ----
+    STUDIO.blend+=(STUDIO.target-STUDIO.blend)*Math.min(1,dt*1.8);
+    const sb=smooth(0,1,STUDIO.blend);ST.grp.visible=sb>.01;
+    if(sb>.01){const r=studioUpdate(dt);camera.position.lerp(r.pos,sb);look.lerp(r.tgt,sb);camera.lookAt(look);
+      sunStudio.copy(SPOT).addScaledVector(r.sunDir,480);sunPos.lerp(sunStudio,sb);glows.forEach(g=>g.position.copy(sunPos));
+      if(sb>.5){sunL.position.copy(SPOT).addScaledVector(r.sunDir,110);sunL.castShadow=r.sunDir.y>0}else{sunL.position.copy(sunPos);sunL.castShadow=false}}
+    else sunL.castShadow=false;
+    if(sb>.01){const k=Math.max(sm*.9,rn*.6);scene.fog.far=lerp(scene.fog.far,lerp(520,24,k),sb);scene.fog.near=lerp(scene.fog.near,lerp(90,0,k),sb)}
+    rainUpdate(dt,rn);if(rain)rain.scale.setScalar(lerp(1,.28,sb));
+    renderer.render(scene,camera);
+  }
+  return{update};
+}
+loadThree(()=>{B=initB()});
+
+/* ================= velocímetro ================= */
+const GMAX=1400,CX=130,CY=136,R=104;
+const polar=v=>{const a=Math.PI*(1-v/GMAX);return[CX+R*Math.cos(a),CY-R*Math.sin(a)]};
+const arcD=v=>{const[x,y]=polar(Math.max(v,1));return`M${CX-R},${CY} A${R},${R} 0 0 1 ${x.toFixed(2)},${y.toFixed(2)}`};
+$('#gTrack').setAttribute('d',arcD(GMAX));
+[0,350,700,1050,1400].forEach(v=>{const a=Math.PI*(1-v/GMAX),x=CX+(R+22)*Math.cos(a),y=CY-(R+22)*Math.sin(a);
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y+4);t.setAttribute('text-anchor','middle');t.setAttribute('class','gtick');t.textContent=v;$('#gTicks').appendChild(t)});
+function zoneOf(g){if(g<1)return['Sin sol','#5A6B80'];if(g<CFG.z1)return['Radiación baja','#8FD3F4'];if(g<CFG.z2)return['Radiación moderada','#F5D06A'];if(g<CFG.z3)return['Radiación alta','#F5A524'];return['Radiación muy alta','#FF6A3D']}
+function drawGauge(g){
+  $('#gArc').setAttribute('d',arcD(clamp(g,0,GMAX)));$('#gArc').style.opacity=g<2?0:1;
+  $('#gNeedle').setAttribute('transform',`rotate(${(-90+180*clamp(g,0,GMAX)/GMAX).toFixed(2)} ${CX} ${CY})`);
+  $('#gNum').textContent=nf(Math.round(g));$('#gMa').textContent=toMA(g).toFixed(2)+' mA';
+  const z=zoneOf(g);$('#zTxt').textContent=z[0];$('#zDot').style.background=z[1];$('#zDot').style.boxShadow=`0 0 10px ${z[1]}`;
+}
+
+/* ================= gráfica día solar ================= */
+const SVGNS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const FONT={'font-family':'Inter,system-ui,sans-serif','font-size':11};
+const chart=$('#chart'),tip=$('#tip');
+const X0=5,X1=19,YMAX=1200;
+let CW=0,CH=300,M={l:46,r:14,t:28,b:28},chartLimit=0,hoverLine,hoverDots,hovering=false;
+const sx=h=>M.l+(h-X0)/(X1-X0)*(CW-M.l-M.r), sy=v=>CH-M.b-clamp(v,0,YMAX)/YMAX*(CH-M.t-M.b);
+function drawChart(){
+  const D=sel;CW=chart.clientWidth;CH=chart.clientHeight;chart.setAttribute('viewBox',`0 0 ${CW} ${CH}`);chart.innerHTML='';
+  const defs=el('defs',{},chart);
+  const lg=el('linearGradient',{id:'ag',x1:0,y1:0,x2:0,y2:1},defs);el('stop',{offset:0,'stop-color':'#F5A524','stop-opacity':.42},lg);el('stop',{offset:1,'stop-color':'#F5A524','stop-opacity':0},lg);
+  const pt=el('pattern',{id:'hatch',width:6,height:6,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);el('rect',{width:2,height:6,fill:'rgba(255,255,255,.38)'},pt);
+  [0,300,600,900,1200].forEach(v=>{el('line',{x1:M.l,x2:CW-M.r,y1:sy(v),y2:sy(v),stroke:'rgba(255,255,255,.12)'},chart);
+    el('text',{x:M.l-8,y:sy(v)+4,'text-anchor':'end',fill:'rgba(255,255,255,.6)',...FONT},chart).textContent=v});
+  for(let h=6;h<=18;h+=3)el('text',{x:sx(h),y:CH-8,'text-anchor':'middle',fill:'rgba(255,255,255,.6)',...FONT},chart).textContent=h+'h';
+  el('text',{x:4,y:12,fill:'rgba(255,255,255,.6)',...FONT},chart).textContent='W/m²';
+  const lim=limitOf(D);chartLimit=lim;
+  const vis=D.pts.filter(p=>p.h>=X0&&p.h<=X1).map(p=>({h:p.h,cs:p.cs,g:cal(p.g)}));
+  const upto=vis.filter(p=>p.h<=lim);
+  const L=a=>a.map(p=>`${sx(p.h).toFixed(1)},${sy(p.v).toFixed(1)}`).join(' L');
+  if(upto.length>1){
+    el('path',{d:'M'+L(upto.map(p=>({h:p.h,v:p.cs})))+' L'+L(upto.slice().reverse().map(p=>({h:p.h,v:Math.min(p.g,p.cs)})))+' Z',fill:'url(#hatch)'},chart);
+    el('path',{d:`M${sx(upto[0].h)},${sy(0)} L`+L(upto.map(p=>({h:p.h,v:p.g})))+` L${sx(upto[upto.length-1].h)},${sy(0)} Z`,fill:'url(#ag)'},chart);
+  }
+  el('path',{d:'M'+L(vis.map(p=>({h:p.h,v:p.cs}))),fill:'none',stroke:'rgba(255,255,255,.85)','stroke-width':2,'stroke-dasharray':'6 5','stroke-linecap':'round'},chart);
+  if(upto.length>1)el('path',{d:'M'+L(upto.map(p=>({h:p.h,v:p.g}))),fill:'none',stroke:'#F5A524','stroke-width':2.4,'stroke-linejoin':'round','stroke-linecap':'round'},chart);
+  const pk=vis.reduce((a,b)=>b.cs>a.cs?b:a);
+  el('text',{x:sx(pk.h),y:sy(pk.cs)-8,'text-anchor':'middle',fill:'rgba(255,255,255,.85)',...FONT,'font-size':12},chart).textContent='Cielo despejado';
+  if(isToday(D)&&H>=X0&&H<=X1){const g=gToday(H),x=sx(H),right=x>CW-90;
+    el('line',{x1:x,x2:x,y1:M.t,y2:CH-M.b,stroke:'rgba(255,255,255,.35)','stroke-dasharray':'2 4'},chart);
+    el('circle',{cx:x,cy:sy(g),r:12,fill:'rgba(245,165,36,.25)'},chart);
+    el('circle',{cx:x,cy:sy(g),r:6,fill:'#F5A524',stroke:'#fff','stroke-width':2},chart);
+    el('text',{x:x+(right?-10:10),y:sy(g)-12,'text-anchor':right?'end':'start',fill:'#fff',...FONT,'font-size':12,'font-weight':600},chart).textContent='Ahora';
+  }
+  hoverLine=el('line',{x1:0,x2:0,y1:M.t,y2:CH-M.b,stroke:'rgba(255,255,255,.6)',opacity:0},chart);
+  hoverDots=[el('circle',{r:5,fill:'#fff',stroke:'#16323F','stroke-width':2,opacity:0},chart),el('circle',{r:5,fill:'#F5A524',stroke:'#fff','stroke-width':2,opacity:0},chart)];
+  $('#chartDate').textContent=isToday(D)?'hoy · '+dayName(D.date):dayName(D.date);
+}
+chart.addEventListener('pointermove',e=>{
+  const r=chart.getBoundingClientRect(),h=clamp(X0+(e.clientX-r.left-M.l)/(CW-M.l-M.r)*(X1-X0),X0,X1);
+  const p=sel.pts[Math.round(h/STEP)],g=cal(p.g),has=p.h<=chartLimit;hovering=true;
+  hoverLine.setAttribute('x1',sx(p.h));hoverLine.setAttribute('x2',sx(p.h));hoverLine.setAttribute('opacity',1);
+  hoverDots[0].setAttribute('cx',sx(p.h));hoverDots[0].setAttribute('cy',sy(p.cs));hoverDots[0].setAttribute('opacity',1);
+  hoverDots[1].setAttribute('cx',sx(p.h));hoverDots[1].setAttribute('cy',sy(g));hoverDots[1].setAttribute('opacity',has?1:0);
+  tip.innerHTML=`<b>${fmtH(p.h)}</b><div class="r"><span>Medición</span>${has?nf(Math.round(g))+' W/m²':'—'}</div><div class="r"><span>Teórico</span>${nf(Math.round(p.cs))} W/m²</div>`+
+    (has&&p.cs>5?`<div class="r"><span>Pérdida</span>${Math.max(0,Math.round((1-g/p.cs)*100))} %</div><div class="r"><span>Señal</span>${toMA(g).toFixed(2)} mA</div>`:'');
+  const cr=$('#chartCard').getBoundingClientRect();let tx=e.clientX-cr.left+14;if(tx>cr.width-190)tx-=210;
+  tip.style.left=tx+'px';tip.style.top=(e.clientY-cr.top-20)+'px';tip.style.opacity=1;
+});
+chart.addEventListener('pointerleave',()=>{hovering=false;tip.style.opacity=0;if(hoverLine){hoverLine.setAttribute('opacity',0);hoverDots.forEach(d=>d.setAttribute('opacity',0))}});
+
+/* ================= selección de día ================= */
+function selectDay(D){sel=D;calY=D.date.getFullYear();calM=D.date.getMonth();
+  const v=$('#viewing');if(isToday(D))v.style.display='none';else{v.style.display='inline-flex';$('#viewingTxt').textContent='Viendo: '+dayName(D.date)}
+  drawHist();drawCal();drawChart();updateTiles();}
+$('#backToday').onclick=()=>selectDay(DTODAY);
+
+/* ================= últimos 7 días ================= */
+const hc=$('#hchart'),htip=$('#htip');
+function drawHist(){
+  const W=hc.clientWidth,Hh=hc.clientHeight;hc.setAttribute('viewBox',`0 0 ${W} ${Hh}`);hc.innerHTML='';
+  const m={l:30,r:4,t:22,b:30},vals=DAYS.map(D=>statsUpTo(D,limitOf(D)).kwh),max=Math.max(7,...vals);
+  const bw=(W-m.l-m.r)/7,ysc=v=>Hh-m.b-v/max*(Hh-m.t-m.b);
+  [0,2,4,6].forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:ysc(v),y2:ysc(v),stroke:'rgba(255,255,255,.12)'},hc);
+    el('text',{x:m.l-6,y:ysc(v)+4,'text-anchor':'end',fill:'rgba(255,255,255,.6)',...FONT},hc).textContent=v});
+  el('text',{x:0,y:12,fill:'rgba(255,255,255,.6)',...FONT},hc).textContent='kWh/m²';
+  DAYS.forEach((D,i)=>{const v=vals[i],x=m.l+i*bw+bw*.18,w=bw*.64,y=ysc(v),h=Hh-m.b-y,r=Math.min(4,w/2,h),on=D===sel;
+    el('path',{d:`M${x},${Hh-m.b} V${y+r} Q${x},${y} ${x+r},${y} H${x+w-r} Q${x+w},${y} ${x+w},${y+r} V${Hh-m.b} Z`,fill:on?'#F5A524':'rgba(245,165,36,.45)'},hc);
+    if(on||isToday(D))el('text',{x:x+w/2,y:y-6,'text-anchor':'middle',fill:'#fff',...FONT,'font-weight':600},hc).textContent=nf(v,1);
+    el('text',{x:x+w/2,y:Hh-10,'text-anchor':'middle',fill:on?'#fff':'rgba(255,255,255,.6)',...FONT,'font-weight':on?700:400},hc).textContent=isToday(D)?'Hoy':D.date.toLocaleDateString('es-CO',{weekday:'short',day:'numeric'});
+    const hit=el('rect',{x:m.l+i*bw,y:m.t-10,width:bw,height:Hh-m.t-m.b+10,fill:'transparent',style:'cursor:pointer'},hc);
+    hit.addEventListener('pointerenter',()=>{const s=statsUpTo(D,limitOf(D));
+      htip.innerHTML=`<b>${isToday(D)?'Hoy':dayName(D.date)}</b><div class="r"><span>Energía</span>${nf(s.kwh,2)} kWh/m²</div><div class="r"><span>Pico</span>${nf(Math.round(s.peak))} W/m²</div><div class="r"><span>Claridad</span>${Math.round(s.kt*100)} %</div>`;
+      htip.style.left=Math.min(m.l+i*bw+bw*.6,W-190)+'px';htip.style.top='0px';htip.style.opacity=1});
+    hit.addEventListener('pointerleave',()=>htip.style.opacity=0);
+    hit.addEventListener('click',()=>selectDay(D));
+  });
+}
+
+/* ================= calendario (mapa de calor mensual) ================= */
+let calY=TODAY.getFullYear(),calM=TODAY.getMonth();
+const MIN_M=calY*12+calM-12, MAX_M=calY*12+calM;
+const HEAT=[hex('#5B4A2E'),hex('#F5A524'),hex('#FFD27A')];
+const heat=k=>k<.6?mix(HEAT[0],HEAT[1],k/.6):mix(HEAT[1],HEAT[2],(k-.6)/.4);
+const ctip=$('#ctip');
+function drawCal(){
+  const g=$('#calGrid');g.innerHTML='';
+  ['L','M','M','J','V','S','D'].forEach(w=>{const e=document.createElement('div');e.className='cal-wd';e.textContent=w;g.appendChild(e)});
+  const first=new Date(calY,calM,1),off=(first.getDay()+6)%7,n=new Date(calY,calM+1,0).getDate();
+  const mt=first.toLocaleDateString('es-CO',{month:'long',year:'numeric'});$('#calTitle').textContent=mt.charAt(0).toUpperCase()+mt.slice(1);
+  for(let i=0;i<off;i++)g.appendChild(document.createElement('div'));
+  for(let d=1;d<=n;d++){
+    const date=new Date(calY,calM,d),b=document.createElement('button');b.className='cal-d';b.textContent=d;
+    if(date>TODAY){b.classList.add('fut');b.disabled=true;g.appendChild(b);continue}
+    const D=getDay(date),s=statsUpTo(D,limitOf(D));
+    if(isToday(D)){b.classList.add('today');b.style.background='rgba(245,165,36,.3)'}
+    else{const k=clamp((s.kwh-3.5)/3.5,0,1),c=heat(k);b.style.background=`rgb(${c.map(v=>v|0).join(',')})`;b.style.color=k>.5?'#1d1405':'#fff'}
+    if(D===sel)b.classList.add('sel');
+    b.setAttribute('aria-label',`${dayName(D.date)}: ${nf(s.kwh,2)} kWh/m²`);
+    b.onclick=()=>selectDay(D);
+    b.onpointerenter=()=>{ctip.innerHTML=`<b>${isToday(D)?'Hoy (hasta ahora)':dayName(D.date)}</b><div class="r"><span>Energía</span>${nf(s.kwh,2)} kWh/m²</div><div class="r"><span>Pico</span>${nf(Math.round(s.peak))} W/m²</div><div class="r"><span>Claridad</span>${Math.round(s.kt*100)} %</div>`;
+      const cw=$('#cal').clientWidth;ctip.style.left=clamp(b.offsetLeft-70,0,cw-185)+'px';ctip.style.top=(b.offsetTop-96)+'px';ctip.style.opacity=1};
+    b.onpointerleave=()=>ctip.style.opacity=0;
+    g.appendChild(b);
+  }
+  $('#calPrev').disabled=calY*12+calM<=MIN_M;$('#calNext').disabled=calY*12+calM>=MAX_M;
+}
+$('#calPrev').onclick=()=>{calM--;if(calM<0){calM=11;calY--}drawCal()};
+$('#calNext').onclick=()=>{calM++;if(calM>11){calM=0;calY++}drawCal()};
+
+/* ================= tarjetas ================= */
+function skyLabel(kt){return kt>=.75?'☀ Despejado':kt>=.5?'⛅ Parcial':kt>0?'☁ Nublado':'—'}
+function updateTiles(){
+  const D=sel,s=statsUpTo(D,limitOf(D)),td=isToday(D);
+  $('#tPeak').innerHTML=(s.peak>0?nf(Math.round(s.peak)):'—')+'<small>W/m²</small>';
+  $('#tPeakN').textContent=s.peak>0?`Máximo a las ${fmtH(s.peakH)}${td?' (hasta ahora)':''}.`:'Aún no ha salido el sol.';
+  $('#tEnergy').innerHTML=nf(s.kwh,2)+'<small>kWh/m²</small>';
+  $('#tEnergyN').textContent=`≈ ${nf(s.kwh,1)} horas solares pico. Sin nubes habrían sido ${nf(s.kwhCs,2)}.`;
+  $('#tKt').innerHTML=(s.kwhCs>0?Math.round(s.kt*100):'—')+'<small>%</small>';
+  $('#tKtN').textContent=s.kwhCs>0?skyLabel(s.kt)+` · las nubes se llevaron ${Math.max(0,Math.round((1-s.kt)*100))} % de la energía.`:'Esperando el amanecer.';
+  $('#tDay').innerHTML=nf(D.set-D.rise,1)+'<small>h de luz</small>';
+  $('#tDayN').textContent=`Amanecer ${fmtH(D.rise)} · Atardecer ${fmtH(D.set)}. Cerca del ecuador los días duran casi 12 h todo el año.`;
+  const pv=s.kwh*CFG.eff/100*CFG.area;
+  $('#tPanel').innerHTML=nf(pv,2)+'<small>kWh</small>';
+  $('#tPanelN').textContent=`≈ ${nf(Math.floor(pv*1000/CFG.phoneWh))} cargas completas de celular · ${nf(pv*CFG.co2*1000)} g de CO₂ evitados.`;
+  $('#exP').innerHTML=`Panel de referencia de ${nf(CFG.area,1)} m² con ${nf(CFG.eff,0)} % de eficiencia. El CO₂ evitado usa un factor de ${String(CFG.co2).replace('.',',')} kg por kWh. Puedes cambiar estos valores con el botón ⚙ de arriba.`;
+  const cop=pv*CFG.tariff;
+  $('#tCop').innerHTML='$'+nf(Math.round(cop))+'<small>COP</small>';
+  $('#tCopN').textContent=`Con tarifa de $${nf(CFG.tariff)}/kWh. Un mes de días así: ≈ $${nf(Math.round(cop*30))}.`;
+  $('#gSky').textContent=skyLabel(clearSky(DTODAY.doy,H)>5?gToday(H)/clearSky(DTODAY.doy,H):0);
+}
+document.querySelectorAll('.info').forEach(b=>b.onclick=()=>$('#'+b.dataset.x).classList.toggle('on'));
+
+/* ================= CSV ================= */
+$('#dlBtn').onclick=()=>{
+  const r=$('#dlRange').value;let list;
+  if(r==='7')list=DAYS;else if(r==='month'){list=[];const n=new Date(calY,calM+1,0).getDate();for(let d=1;d<=n;d++){const dt=new Date(calY,calM,d);if(dt<=TODAY)list.push(getDay(dt))}}else list=[sel];
+  const step=CFG.interval/60;let csv='fecha,hora,irradiancia_wm2,corriente_ma,teorica_wm2\n';
+  list.forEach(D=>{for(let h=0;h<24-1e-9;h+=step){if(isToday(D)&&h>H)break;const cs=clearSky(D.doy,h),g=cal(cs*cloudF(D,h));
+    csv+=`${D.key},${fmtH(h)},${g.toFixed(1)},${toMA(g).toFixed(3)},${cs.toFixed(1)}\n`}});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=r==='7'?'radiacion_7dias.csv':r==='month'?`radiacion_${calY}-${String(calM+1).padStart(2,'0')}.csv`:`radiacion_${sel.key}.csv`;a.click();
+};
+
+/* ================= configuración ================= */
+const SCHEMA=[
+  {t:'☀ Panel de referencia',f:[
+    ['eff','Eficiencia del panel','%',1,'Paneles comerciales: entre 18 y 23 %.'],
+    ['area','Área del panel','m²',.1,''],
+    ['phoneWh','Energía de una carga de celular','Wh',1,'Un celular típico guarda entre 12 y 20 Wh.'],
+    ['co2','Factor de emisión de CO₂','kg/kWh',.001,'Factor de la red eléctrica colombiana (SIN). Verifícalo con el dato oficial más reciente de la UPME.']]},
+  {t:'💰 Ahorro en pesos',f:[
+    ['tariff','Tarifa de energía','COP/kWh',1,'Valor de ejemplo: usa el de la factura (depende del estrato y del comercializador).']]},
+  {t:'📡 Calibración del sensor',f:[
+    ['gmax','Rango máximo del sensor','W/m²',10,'SN-300AL-RA-I20: 0–2000 W/m² (confirmar en la hoja de datos).'],
+    ['mamin','Corriente a 0 W/m²','mA',.01,''],
+    ['mamax','Corriente a escala completa','mA',.01,''],
+    ['gain','Ganancia (corrección)','×',.01,'Multiplica la lectura. Se obtiene comparando con un sensor de referencia.'],
+    ['offset','Ajuste de cero','W/m²',1,'Se suma a la lectura para corregir un desfase.'],
+    ['interval','Intervalo de lectura','min',[1,5,10,15],'Cada cuánto guarda un dato la Raspberry. También se usa en el CSV.']]},
+  {t:'🎯 Umbrales del velocímetro',f:[
+    ['z1','Radiación baja hasta','W/m²',10,''],
+    ['z2','Moderada hasta','W/m²',10,''],
+    ['z3','Alta hasta','W/m²',10,'Por encima de este valor: radiación muy alta.']]}
+];
+(function buildSettings(){const body=$('#stBody');
+  SCHEMA.forEach(sec=>{const s=document.createElement('div');s.className='st-sec';s.innerHTML=`<h4>${sec.t}</h4>`;
+    sec.f.forEach(([k,label,unit,step,help])=>{const f=document.createElement('div');f.className='fld';f.dataset.k=k;
+      const ctl=Array.isArray(step)?`<select id="f_${k}">${step.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>`:`<input id="f_${k}" type="number" step="${step}" inputmode="decimal">`;
+      f.innerHTML=`<label for="f_${k}">${label}</label><div class="inp">${ctl}<span>${unit}</span></div>${help?`<small>${help}</small>`:''}`;s.appendChild(f)});
+    body.appendChild(s)});
+})();
+function fillSettings(src){Object.keys(CFG_DEF).forEach(k=>{$('#f_'+k).value=src[k]})}
+function openSettings(o){$('#settings').classList.toggle('on',o);$('#scrim').classList.toggle('on',o);$('#settings').setAttribute('aria-hidden',!o);if(o)fillSettings(CFG)}
+$('#gearBtn').onclick=()=>openSettings(true);$('#stClose').onclick=()=>openSettings(false);$('#scrim').onclick=()=>openSettings(false);
+addEventListener('keydown',e=>{if(e.key==='Escape')openSettings(false)});
+$('#stReset').onclick=()=>fillSettings(CFG_DEF);
+function toast(msg,err){const t=$('#toast');t.textContent=msg;t.classList.toggle('err',!!err);t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2200)}
+$('#stApply').onclick=()=>{
+  const nv={};let bad=null;document.querySelectorAll('.fld').forEach(f=>f.classList.remove('bad'));
+  Object.keys(CFG_DEF).forEach(k=>{const v=parseFloat(String($('#f_'+k).value).replace(',','.'));if(!isFinite(v)){bad=bad||k}nv[k]=v});
+  const rules=[[nv.eff>0&&nv.eff<=100,'eff','La eficiencia debe estar entre 0 y 100 %'],[nv.area>0,'area','El área debe ser mayor que 0'],[nv.phoneWh>0,'phoneWh','La carga del celular debe ser mayor que 0'],
+    [nv.co2>=0,'co2','El factor de CO₂ no puede ser negativo'],[nv.tariff>=0,'tariff','La tarifa no puede ser negativa'],[nv.gmax>0,'gmax','El rango debe ser mayor que 0'],
+    [nv.mamin<nv.mamax,'mamax','La corriente máxima debe ser mayor que la mínima'],[nv.gain>0,'gain','La ganancia debe ser mayor que 0'],
+    [nv.z1<nv.z2&&nv.z2<nv.z3,'z2','Los umbrales deben ir de menor a mayor']];
+  let msg=bad?'Revisa los campos marcados':null;
+  rules.forEach(([ok,k,m])=>{if(!ok&&!msg){msg=m;bad=k}});
+  if(msg){const bf=document.querySelector(`.fld[data-k="${bad}"]`);bf.classList.add('bad');bf.scrollIntoView({block:'center',behavior:'smooth'});toast(msg,true);return}
+  CFG=nv;drawChart();drawHist();drawCal();updateTiles();toast('Configuración aplicada');openSettings(false);
+};
+
+/* ================= controles de tiempo ================= */
+const slider=$('#slider');
+slider.oninput=()=>{H=+slider.value};
+$('#play').onclick=()=>{playing=!playing;$('#pi').innerHTML=playing?'<path d="M4 2h3v12H4zM9 2h3v12H9z" fill="currentColor"/>':'<path d="M4 2l10 6-10 6z" fill="currentColor"/>'};
+$('#speed').onclick=()=>{speedIdx=(speedIdx+1)%SPEEDS.length;$('#speed').textContent=SPEEDS[speedIdx][1]};
+function phase(h,D){if(h<D.rise-.5||h>D.set+.6)return'Noche';if(h<D.rise+.8)return'Amanecer';if(h<11)return'Mañana';if(h<13.5)return'Mediodía';if(h<D.set-.8)return'Tarde';return'Atardecer'}
+addEventListener('scroll',()=>{scrollP=clamp(scrollY/(innerHeight*.9),0,1)},{passive:true});
+addEventListener('resize',()=>{drawChart();drawHist()});
+
+/* ===================================================================
+   LABORATORIO SOLAR
+   Motor físico simplificado:
+   - Posición del sol (NOAA) con azimut, para cualquier latitud
+   - Cielo despejado: Meinel (DNI) + 10 % difusa; masa de aire Kasten-Young
+   - Humo/polvo: atenuación extra de la directa (parte vuelve como difusa)
+   - Nubes: modelo simplificado tipo Kasten-Czeplak  GHI = GHIcs·(1 − 0,75·C²); lluvia atenúa más
+   - Plano del panel: directa·cos(AOI) + difusa isotrópica + albedo 0,2
+   - Temperatura de celda: NOCT 45 °C · coeficiente por tipo de panel
+   =================================================================== */
+const D2R=Math.PI/180, LSTEP=1/6;
+const C_BASE='rgba(255,255,255,.85)', C_SOL='#F5A524', C_SKY='#8FD3F4', C_GRN='#7FD6A6';
+function sunAt(n,h,latDeg,lonDeg){
+  const g=2*Math.PI/365*(n-1+(h-12)/24);
+  const eot=229.18*(.000075+.001868*Math.cos(g)-.032077*Math.sin(g)-.014615*Math.cos(2*g)-.040849*Math.sin(2*g));
+  const dec=.006918-.399912*Math.cos(g)+.070257*Math.sin(g)-.006758*Math.cos(2*g)+.000907*Math.sin(2*g)-.002697*Math.cos(3*g)+.00148*Math.sin(3*g);
+  const ha=((h*60+eot+4*lonDeg-60*TZ)/4-180)*D2R, la=latDeg*D2R;
+  const cz=Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(ha);
+  const az=Math.atan2(Math.sin(ha),Math.cos(ha)*Math.sin(la)-Math.tan(dec)*Math.cos(la))+Math.PI;
+  return{cz,el:Math.asin(clamp(cz,-1,1))/D2R,az};
+}
+const PTYPES={mono:{n:'Monocristalino',eff:.21,gt:-.0035,c:C_SOL},poli:{n:'Policristalino',eff:.17,gt:-.004,c:C_SKY},thin:{n:'Película delgada',eff:.12,gt:-.0025,c:C_GRN}};
+const BASE={doy:DTODAY.doy,lat:4.142,lon:LON,cloud:0,rain:0,smoke:0,dirt:0,sdirt:0,eclipse:0,tilt:0,paz:180,tracker:false,tmax:31,type:'mono',obst:null,area:1};
+const PS=o=>Object.assign({},BASE,o);
+function point(p,h){
+  const tmin=p.tmax-9,ta=tmin+(p.tmax-tmin)*(.5+.5*Math.sin(Math.PI*(h-9)/12));
+  const s=sunAt(p.doy,h,p.lat,p.lon);
+  const zero={h,ghi:0,ghiS:0,poa:0,dni:0,dhi:0,beam:0,tc:ta,ta,pw:0,pw25:0,el:s.el,shade:false};
+  if(s.cz<=.002)return zero;
+  const zd=Math.acos(s.cz)/D2R,AM=1/(s.cz+.50572*Math.pow(Math.max(96.07995-zd,.1),-1.6364));
+  let dni=1361*Math.pow(.7,Math.pow(AM,.678)),dhi=.1*dni;
+  const tr=Math.exp(-p.smoke*.7*AM),lost=dni*(1-tr);dni*=tr;dhi+=lost*.35*s.cz;
+  let ghi=dni*s.cz+dhi;
+  const C=Math.max(p.cloud,p.rain>0?.7+.3*p.rain:0);
+  const g2=ghi*(1-.75*C*C)*(1-.45*p.rain);
+  const kd=clamp(dhi/ghi+(1-dhi/ghi)*C,0,1);
+  dhi=g2*kd;dni=(g2-dhi)/Math.max(s.cz,.05);ghi=g2;
+  const e=1-p.eclipse;ghi*=e;dni*=e;dhi*=e;
+  let shade=false;
+  if(p.obst){const ah=Math.atan(p.obst.h/p.obst.d)/D2R,aw=Math.atan(p.obst.w/2/p.obst.d)/D2R+2;
+    let da=Math.abs(s.az/D2R-p.obst.az);if(da>180)da=360-da;shade=s.el<ah&&da<aw}
+  const z=Math.acos(s.cz);let cosA,beta;
+  if(p.tracker){cosA=1;beta=z}else{beta=p.tilt*D2R;cosA=Math.cos(z)*Math.cos(beta)+Math.sin(z)*Math.sin(beta)*Math.cos(s.az-p.paz*D2R)}
+  const beam=shade?0:dni*Math.max(0,cosA);
+  let poa=(beam+dhi*(1+Math.cos(beta))/2+ghi*.2*(1-Math.cos(beta))/2)*(1-p.dirt);
+  const T=PTYPES[p.type],tc=ta+poa/800*25;
+  return{h,ghi,ghiS:ghi*(1-p.sdirt),poa,dni,dhi,beam,tc,ta,pw:poa*p.area*T.eff*(1+T.gt*(tc-25)),pw25:poa*p.area*T.eff,el:s.el,shade};
+}
+function series(p,x0=5,x1=19,step=LSTEP){const a=[];for(let h=x0;h<=x1+1e-9;h+=step)a.push(point(p,h));return a}
+const tot=(a,k,step=LSTEP)=>a.reduce((s,p)=>s+p[k],0)*step/1000;
+const peakOf=(a,k)=>a.reduce((m,p)=>p[k]>m[k]?p:m,a[0]);
+const pts=(a,k)=>a.map(p=>({h:p.h,v:p[k]}));
+
+/* ---------- gráfica pequeña reutilizable ---------- */
+function niceMax(v){const s=[10,20,25,50,100,200,300,400,500,600,800,1000,1200,1500,2000];for(const x of s)if(x>=v*1.04)return x;return Math.ceil(v/500)*500}
+function miniChart(svg,o){
+  const W=svg.clientWidth||520,Hh=svg.clientHeight||210;svg.setAttribute('viewBox',`0 0 ${W} ${Hh}`);svg.innerHTML='';
+  const x0=o.x0??5,x1=o.x1??19,m={l:42,r:10,t:20,b:24};
+  const ymax=o.ymax||niceMax(Math.max(10,...o.series.flatMap(s=>s.pts.map(p=>p.v))));
+  const X=h=>m.l+(h-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>Hh-m.b-clamp(v,0,ymax)/ymax*(Hh-m.t-m.b);
+  (o.bands||[]).forEach(b=>el('rect',{x:X(b[0]),y:m.t,width:Math.max(1,X(b[1])-X(b[0])),height:Hh-m.t-m.b,fill:b[2]},svg));
+  for(let i=0;i<=4;i++){const v=ymax*i/4;el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:'rgba(255,255,255,.12)'},svg);
+    el('text',{x:m.l-6,y:Y(v)+4,'text-anchor':'end',fill:'rgba(255,255,255,.6)',...FONT},svg).textContent=o.fy?o.fy(v):nf(v)}
+  const xs=o.xticks||(x1-x0>14?[0,6,12,18,24]:[6,9,12,15,18]);
+  xs.forEach(h=>{if(h>=x0&&h<=x1)el('text',{x:X(h),y:Hh-6,'text-anchor':h===x1?'end':h===x0?'start':'middle',fill:'rgba(255,255,255,.6)',...FONT},svg).textContent=(o.fx?o.fx(h):h+'h')});
+  el('text',{x:4,y:12,fill:'rgba(255,255,255,.6)',...FONT},svg).textContent=o.ylab||'W/m²';
+  o.series.forEach(s=>{if(s.pts.length<2)return;
+    if(s.area)el('path',{d:`M${X(s.pts[0].h)},${Y(0)} L`+s.pts.map(p=>`${X(p.h).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' L')+` L${X(s.pts[s.pts.length-1].h)},${Y(0)} Z`,fill:s.color,opacity:.16},svg);
+    el('path',{d:'M'+s.pts.map(p=>`${X(p.h).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' L'),fill:'none',stroke:s.color,'stroke-width':s.w||2.2,'stroke-dasharray':s.dash?'6 5':'none','stroke-linejoin':'round','stroke-linecap':'round'},svg)});
+  if(o.marker!=null&&o.marker>=x0&&o.marker<=x1)el('line',{x1:X(o.marker),x2:X(o.marker),y1:m.t,y2:Hh-m.b,stroke:'rgba(255,255,255,.5)','stroke-dasharray':'2 4'},svg);
+  const hl=el('line',{y1:m.t,y2:Hh-m.b,stroke:'rgba(255,255,255,.6)',opacity:0},svg);
+  const dots=o.series.map(s=>el('circle',{r:4.5,fill:s.color.startsWith('rgba')?'#fff':s.color,stroke:'#0b1d2a','stroke-width':2,opacity:0},svg));
+  svg._ch={o,X,Y,x0,x1,m,W,hl,dots};
+  if(!svg._bound){svg._bound=true;const tip=svg.parentNode.querySelector('.tip');
+    svg.addEventListener('pointermove',e=>{const c=svg._ch;if(!c)return;const r=svg.getBoundingClientRect();
+      const h=clamp(c.x0+(e.clientX-r.left-c.m.l)/(c.W-c.m.l-c.m.r)*(c.x1-c.x0),c.x0,c.x1);let rows='',hh=h;
+      c.o.series.forEach((s,i)=>{if(!s.pts.length)return;const p=s.pts.reduce((a,b)=>Math.abs(b.h-h)<Math.abs(a.h-h)?b:a);hh=p.h;
+        c.dots[i].setAttribute('cx',c.X(p.h));c.dots[i].setAttribute('cy',c.Y(p.v));c.dots[i].setAttribute('opacity',1);
+        rows+=`<div class="r"><span>${s.label}</span>${c.o.fv?c.o.fv(p.v):nf(Math.round(p.v))+' '+(c.o.ylab||'W/m²')}</div>`});
+      c.hl.setAttribute('x1',c.X(hh));c.hl.setAttribute('x2',c.X(hh));c.hl.setAttribute('opacity',1);
+      tip.innerHTML=`<b>${c.o.fx?c.o.fx(hh):fmtH(hh)}</b>`+rows;
+      const pr=svg.parentNode.getBoundingClientRect();let tx=e.clientX-pr.left+12;if(tx>pr.width-200)tx-=220;
+      tip.style.left=tx+'px';tip.style.top=Math.max(0,e.clientY-pr.top-30)+'px';tip.style.opacity=1});
+    svg.addEventListener('pointerleave',()=>{const c=svg._ch;tip.style.opacity=0;if(c){c.hl.setAttribute('opacity',0);c.dots.forEach(d=>d.setAttribute('opacity',0))}});
+  }
+}
+
+/* ---------- tarjetas de experimento ---------- */
+const EXPS=[];
+function setRes(ui,rows){ui.res.innerHTML=rows.map(r=>`<div class="stat"><span>${r[0]}</span><strong>${r[1]}</strong></div>`).join('')}
+function learn(ui,html){ui.learn.innerHTML='💡 '+html}
+function card(o){
+  const c=document.createElement('article');c.className='exp glass'+(o.wide?' wide':'');c.dataset.cat=o.cat;c.hidden=true;
+  c.innerHTML=`<div class="exp-h"><div class="exp-n">${o.n}</div><div><h3>${o.title}</h3><p>${o.q}</p></div></div>`;
+  const st={},ui={card:c};
+  if(o.ctrls&&o.ctrls.length){const box=document.createElement('div');box.className='ctrls';c.appendChild(box);ui.ctrls=box;
+    o.ctrls.forEach(k=>{const w=document.createElement('div');w.className='ctl';
+      if(k.t==='range'){st[k.k]=k.val;
+        w.innerHTML=`<div class="lab"><span>${k.label}</span><b></b></div><input type="range" min="${k.min}" max="${k.max}" step="${k.step||1}" value="${k.val}" aria-label="${k.label}">`;
+        const b=w.querySelector('b'),inp=w.querySelector('input');b.textContent=k.fmt?k.fmt(k.val):k.val;
+        inp.oninput=()=>{st[k.k]=+inp.value;b.textContent=k.fmt?k.fmt(+inp.value):inp.value;run()};
+        ui['set_'+k.k]=v=>{inp.value=v;st[k.k]=+v;b.textContent=k.fmt?k.fmt(+v):v}}
+      else if(k.t==='select'){st[k.k]=k.val;
+        w.innerHTML=`<div class="lab"><span>${k.label}</span></div><select aria-label="${k.label}">${k.opts.map(x=>`<option value="${x[0]}"${String(x[0])===String(k.val)?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+        const s=w.querySelector('select');s.onchange=()=>{st[k.k]=s.value;run()}}
+      else if(k.t==='toggle'){st[k.k]=k.val;
+        w.innerHTML=`<label class="tgl"><input type="checkbox"${k.val?' checked':''}><i></i><span>${k.label}</span></label>`;
+        const i=w.querySelector('input');i.onchange=()=>{st[k.k]=i.checked;run()}}
+      else if(k.t==='button'){w.innerHTML=`<button class="btn sm ${k.cls||''}">${k.label}</button>`;if(k.cls)w.classList.add(k.cls);w.querySelector('button').onclick=()=>k.click(st,ui,run)}
+      box.appendChild(w)})}
+  if(o.legend){const lg=document.createElement('div');lg.className='mleg';
+    lg.innerHTML=o.legend.map(l=>`<span><i class="sw" style="background:${l[2]?`repeating-linear-gradient(90deg,${l[0]} 0 5px,transparent 5px 8px)`:l[0]}"></i>${l[1]}</span>`).join('');c.appendChild(lg)}
+  if(o.extra)o.extra(c,ui,st,()=>run());
+  if(o.chart!==false){const w=document.createElement('div');w.className='mwrap';w.innerHTML='<svg class="mini"></svg><div class="tip"></div>';c.appendChild(w);ui.svg=w.querySelector('svg')}
+  ui.res=document.createElement('div');ui.res.className='res';c.appendChild(ui.res);
+  ui.learn=document.createElement('div');ui.learn.className='learn';c.appendChild(ui.learn);
+  function run(){try{o.update(st,ui)}catch(err){console.error(o.title,err)}}
+  const E={o,st,ui,run};EXPS.push(E);$('#labGrid').appendChild(c);return E;
+}
+const pct=v=>Math.round(v*100)+' %';
+const kwh=v=>nf(v,2)+' kWh/m²';
+
+/* ============ CLIMA Y AMBIENTE ============ */
+card({cat:'clima',n:1,title:'Nubes y lluvia',q:'¿Cuánta energía se pierde en un día nublado o lluvioso?',
+  ctrls:[{k:'cloud',t:'range',label:'Nubosidad',min:0,max:100,val:50,fmt:v=>v+' %'},
+    {k:'rain',t:'range',label:'Lluvia',min:0,max:100,val:0,fmt:v=>v==0?'Sin lluvia':v<35?'Llovizna':v<70?'Moderada':'Aguacero'}],
+  legend:[[C_BASE,'Cielo despejado',1],[C_SOL,'Tu escenario']],
+  update(st,ui){const b=series(PS({})),s=series(PS({cloud:st.cloud/100,rain:st.rain/100}));
+    miniChart(ui.svg,{series:[{pts:pts(b,'ghi'),color:C_BASE,dash:1,label:'Despejado'},{pts:pts(s,'ghi'),color:C_SOL,area:1,label:'Escenario'}]});
+    const eb=tot(b,'ghi'),es=tot(s,'ghi'),pk=peakOf(s,'ghi');
+    setRes(ui,[['Energía del día',kwh(es)],['Con cielo despejado',kwh(eb)],['Pérdida',pct(1-es/eb)],['Pico',nf(Math.round(pk.ghi))+' W/m²']]);
+    learn(ui,st.rain>0?`Con lluvia el cielo queda casi cubierto y se pierde ${pct(1-es/eb)} de la energía. Aun así nunca llega a cero: la <b>luz difusa</b> atraviesa las nubes. Dato curioso: la lluvia <b>limpia los paneles</b> (mira el experimento 2).`
+      :st.cloud<30?'Con pocas nubes casi no se nota la diferencia: las nubes delgadas dejan pasar la mayoría de la luz.'
+      :`Las nubes bloquean sobre todo la <b>luz directa</b> del sol. Lo que queda es luz difusa, que llega desde todo el cielo. Con ${st.cloud} % de nubosidad se pierde ${pct(1-es/eb)}.`)}});
+
+card({cat:'clima',n:2,title:'Suciedad en el panel',q:'¿Qué pasa si nadie limpia el panel ni el sensor durante semanas?',
+  ctrls:[{k:'days',t:'range',label:'Días sin limpiar',min:0,max:120,val:30,fmt:v=>v+' días'},
+    {t:'button',label:'🌧 Que llueva',click:(st,ui,run)=>{const d0=st.days,t0=performance.now();const f=()=>{const k=Math.min(1,(performance.now()-t0)/1200);ui.set_days(Math.round(d0*(1-k)));run();if(k<1)requestAnimationFrame(f)};f()}}],
+  legend:[[C_BASE,'Panel limpio',1],[C_SOL,'Panel sucio']],
+  update(st,ui){const loss=.25*(1-Math.exp(-st.days/45)),b=series(PS({})),s=series(PS({dirt:loss}));
+    miniChart(ui.svg,{series:[{pts:pts(b,'poa'),color:C_BASE,dash:1,label:'Limpio'},{pts:pts(s,'poa'),color:C_SOL,area:1,label:'Sucio'}]});
+    const lostKwh=(tot(b,'poa')-tot(s,'poa'))*CFG.eff/100*CFG.area*30;
+    setRes(ui,[['Pérdida por suciedad',pct(loss)],['Energía perdida al mes',nf(lostKwh,1)+' kWh'],['Dinero perdido al mes','$'+nf(Math.round(lostKwh*CFG.tariff))],['Error del sensor',pct(loss*.6)]]);
+    learn(ui,`El polvo y el humo de la temporada seca se pegan al vidrio. Tras ${st.days} días se pierde ${pct(loss)}. El <b>sensor también se ensucia</b> y empieza a marcar menos de lo real. Limpiar cada mes, o inclinar el panel al menos 10° para que la lluvia lo lave, recupera esa energía.`)}});
+
+card({cat:'clima',n:3,title:'Humo de quemas y polvo',q:'En enero–marzo las quemas llenan el cielo de humo. ¿Cómo afecta al sol?',
+  ctrls:[{k:'smoke',t:'range',label:'Humo en el aire',min:0,max:100,val:50,fmt:v=>v==0?'Aire limpio':v<30?'Leve':v<65?'Moderado':'Denso'}],
+  legend:[[C_BASE,'Aire limpio (total)',1],[C_SOL,'Con humo (total)'],[C_SKY,'Luz directa'],[C_GRN,'Luz difusa']],
+  extra(c,ui){ui.sw=document.createElement('div');ui.sw.className='skyswatch';ui.sw.innerHTML='<i></i>';c.appendChild(ui.sw)},
+  update(st,ui){const sm=st.smoke/100,b=series(PS({})),s=series(PS({smoke:sm}));
+    const haze=hex('#D9A86C'),top=mix(hex('#3F98D6'),haze,sm*.7),bot=mix(hex('#A9DDF5'),hex('#F0D2A8'),sm*.85);
+    ui.sw.style.background=`linear-gradient(180deg,rgb(${top.map(v=>v|0)}),rgb(${bot.map(v=>v|0)}))`;
+    const sun=ui.sw.querySelector('i');sun.style.background=`rgb(${mix(hex('#FFF6D8'),hex('#FF8A3D'),sm).map(v=>v|0)})`;sun.style.boxShadow=`0 0 ${30-sm*20}px ${12-sm*8}px rgba(255,220,150,${.9-sm*.6})`;
+    miniChart(ui.svg,{series:[{pts:pts(b,'ghi'),color:C_BASE,dash:1,label:'Limpio'},{pts:pts(s,'ghi'),color:C_SOL,label:'Con humo'},
+      {pts:s.map(p=>({h:p.h,v:p.dni*Math.max(0,Math.sin(p.el*D2R))})),color:C_SKY,label:'Directa'},{pts:pts(s,'dhi'),color:C_GRN,label:'Difusa'}]});
+    const n=peakOf(s,'ghi'),nb=peakOf(b,'ghi');
+    setRes(ui,[['Total al mediodía',nf(Math.round(n.ghi))+' W/m²'],['Directa',nf(Math.round(n.dni*Math.sin(n.el*D2R)))+' W/m²'],['Difusa',nf(Math.round(n.dhi))+' (antes '+nf(Math.round(nb.dhi))+')'],['Pérdida del día',pct(1-tot(s,'ghi')/tot(b,'ghi'))]]);
+    learn(ui,'El humo bloquea sobre todo la <b>luz directa</b>. Parte de esa luz rebota en las partículas y llega como <b>luz difusa</b>: por eso el cielo se ve blanco o naranja y el sol pierde su borde. Es un efecto muy típico de los Llanos en temporada seca.')}});
+
+card({cat:'clima',n:4,title:'Temperatura del panel',q:'Más sol es mejor… pero ¿más calor también?',
+  ctrls:[{k:'tmax',t:'range',label:'Temperatura máxima del aire',min:18,max:40,val:31,fmt:v=>v+' °C'},
+    {k:'type',t:'select',label:'Tipo de panel',val:'mono',opts:Object.entries(PTYPES).map(([k,v])=>[k,v.n])}],
+  legend:[[C_BASE,'Si el panel estuviera a 25 °C',1],[C_SOL,'Potencia real']],
+  update(st,ui){const s=series(PS({tmax:st.tmax,type:st.type}));
+    miniChart(ui.svg,{ylab:'W',series:[{pts:pts(s,'pw25'),color:C_BASE,dash:1,label:'A 25 °C'},{pts:pts(s,'pw'),color:C_SOL,area:1,label:'Real'}]});
+    const hot=peakOf(s,'tc'),e=tot(s,'pw'),e25=tot(s,'pw25');
+    setRes(ui,[['Aire (máx.)',st.tmax+' °C'],['Panel (máx.)',Math.round(hot.tc)+' °C'],['Pérdida por calor',pct(1-e/e25)],['Energía (1 m²)',nf(e,2)+' kWh']]);
+    learn(ui,`Al sol, el panel llega a <b>${Math.round(hot.tc)} °C</b>, unos ${Math.round(hot.tc-hot.ta)} °C más que el aire. Cada grado por encima de 25 °C le quita cerca de ${nf(Math.abs(PTYPES[st.type].gt*100),2)} % de potencia. Por eso los paneles rinden mejor en días frescos y con viento. Cuando llegue el sensor de temperatura podremos medirlo de verdad.`)}});
+
+card({cat:'clima',n:5,title:'Sombras',q:'¿Un árbol o un edificio cerca le roban mucha energía al panel?',
+  ctrls:[{k:'ob',t:'select',label:'Obstáculo',val:'tree',opts:[['tree','🌳 Árbol (8 m)'],['bld','🏢 Edificio (15 m)'],['pole','Poste (6 m)']]},
+    {k:'dist',t:'range',label:'Distancia al panel',min:2,max:40,val:10,fmt:v=>v+' m'},
+    {k:'dir',t:'select',label:'Ubicación del obstáculo',val:'90',opts:[['90','Al oriente (este)'],['270','Al occidente (oeste)'],['180','Al sur'],['0','Al norte']]}],
+  legend:[[C_BASE,'Sin sombra',1],[C_SOL,'Con el obstáculo'],['rgba(0,0,0,.4)','Horas en sombra']],
+  update(st,ui){const O={tree:{h:8,w:6},bld:{h:15,w:20},pole:{h:6,w:.4}}[st.ob];
+    const ob={...O,d:st.dist,az:+st.dir},b=series(PS({})),s=series(PS({obst:ob}));
+    const bands=[];let start=null;s.forEach((p,i)=>{if(p.shade&&start==null)start=p.h;if((!p.shade||i===s.length-1)&&start!=null){bands.push([start,p.h,'rgba(0,0,0,.28)']);start=null}});
+    miniChart(ui.svg,{bands,series:[{pts:pts(b,'poa'),color:C_BASE,dash:1,label:'Sin sombra'},{pts:pts(s,'poa'),color:C_SOL,area:1,label:'Con sombra'}]});
+    const hs=s.filter(p=>p.shade).length*LSTEP,loss=1-tot(s,'poa')/tot(b,'poa');
+    setRes(ui,[['Horas en sombra',nf(hs,1)+' h'],['Pérdida del día',pct(loss)],['Energía',kwh(tot(s,'poa'))]]);
+    const where={90:'por la mañana',270:'por la tarde',180:'cuando el sol va hacia el sur (aprox. de septiembre a marzo)',0:'cuando el sol va hacia el norte (aprox. de abril a agosto)'}[st.dir];
+    learn(ui,hs>0?`El obstáculo tapa el sol ${where}: ${nf(hs,1)} h de sombra y se pierde ${pct(loss)}. Fíjate que ni en sombra llega a cero: queda la luz difusa del cielo.`
+      :`A ${st.dist} m el obstáculo no alcanza a tapar el sol hoy. En Villavicencio el sol pasa casi por encima de nuestras cabezas, así que los obstáculos al norte o al sur afectan poco; los del oriente y el occidente sí importan en la mañana y la tarde.`)}});
+
+/* ============ EL PANEL ============ */
+card({cat:'panel',n:6,title:'Inclinación, orientación y seguidor solar',q:'¿Hacia dónde y con qué ángulo debe mirar el panel? ¿Vale la pena que siga al sol?',
+  ctrls:[{k:'tilt',t:'range',label:'Inclinación',min:0,max:90,val:10,fmt:v=>v+'°'},
+    {k:'paz',t:'select',label:'Mirando hacia',val:'180',opts:[['180','Sur'],['0','Norte'],['90','Este'],['270','Oeste']]},
+    {k:'trk',t:'toggle',label:'Seguidor solar (siempre apunta al sol)',val:false}],
+  legend:[[C_BASE,'Panel plano',1],[C_SOL,'Tu panel']],
+  update(st,ui){const b=series(PS({})),s=series(PS({tilt:st.tilt,paz:+st.paz,tracker:st.trk}));
+    miniChart(ui.svg,{series:[{pts:pts(b,'poa'),color:C_BASE,dash:1,label:'Plano'},{pts:pts(s,'poa'),color:C_SOL,area:1,label:'Tu panel'}]});
+    const eb=tot(b,'poa'),es=tot(s,'poa');let best=0,bv=0;for(let t=0;t<=60;t+=2){const v=tot(series(PS({tilt:t,paz:+st.paz}),5,19,1/3),'poa',1/3);if(v>bv){bv=v;best=t}}
+    const d=es/eb-1;
+    setRes(ui,[['Energía en el panel',kwh(es)],['Frente al plano',(d>=0?'+':'')+pct(d)],['Mejor inclinación hoy',best+'° ('+{180:'sur',0:'norte',90:'este',270:'oeste'}[st.paz]+')']]);
+    learn(ui,st.trk?`El seguidor gana <b>${pct(d)}</b> frente a un panel plano, pero cuesta más y tiene partes móviles que requieren mantenimiento.`
+      :`Cerca del ecuador el sol pasa casi por encima, así que lo mejor es un panel <b>casi plano</b> (unos 10°, que además ayuda a que la lluvia lo limpie). Con ${st.tilt}° hacia el ${{180:'sur',0:'norte',90:'este',270:'oeste'}[st.paz]} el resultado es ${(d>=0?'+':'')+pct(d)} frente al panel plano.`)}});
+
+card({cat:'panel',n:7,title:'Tipos de panel',q:'Monocristalino, policristalino o película delgada: ¿cuál conviene?',
+  ctrls:[{k:'tmax',t:'range',label:'Temperatura máxima del aire',min:18,max:40,val:31,fmt:v=>v+' °C'}],
+  legend:Object.values(PTYPES).map(t=>[t.c,t.n]),
+  update(st,ui){const S=Object.keys(PTYPES).map(k=>[k,series(PS({tmax:st.tmax,type:k}))]);
+    miniChart(ui.svg,{ylab:'W',series:S.map(([k,s])=>({pts:pts(s,'pw'),color:PTYPES[k].c,label:PTYPES[k].n}))});
+    setRes(ui,S.map(([k,s])=>[PTYPES[k].n,`${nf(tot(s,'pw'),2)} kWh · ${nf(1/PTYPES[k].eff,1)} m²/kW`]));
+    learn(ui,'Por metro cuadrado gana el <b>monocristalino</b> (más eficiente). La <b>película delgada</b> necesita casi el doble de área para la misma potencia, pero pierde menos con el calor y es más liviana. El policristalino queda en el medio. El dato “m²/kW” dice cuánta área ocupa 1 kW de paneles.')}});
+
+card({cat:'panel',n:8,title:'Dimensiona tu sistema solar',q:'¿Cuántos paneles y qué batería necesito para alimentar algo?',chart:false,
+  ctrls:[{k:'load',t:'select',label:'¿Qué quieres alimentar?',val:'3',opts:[['0.4','💻 Un portátil (0,4 kWh/día)'],['1.2','🧊 Una nevera (1,2 kWh/día)'],['3','🏫 Un salón de clases (3 kWh/día)'],['5','🏠 Una casa (≈150 kWh/mes)']]},
+    {k:'aut',t:'range',label:'Días de respaldo con batería',min:0,max:3,step:.5,val:1,fmt:v=>v==0?'Sin batería':nf(v,1)+' días'},
+    {k:'v',t:'select',label:'Voltaje del banco',val:'24',opts:[['12','12 V'],['24','24 V'],['48','48 V']]},
+    {k:'cloud',t:'range',label:'Nubosidad típica (diseña para el peor mes)',min:0,max:90,val:70,fmt:v=>v+' %'}],
+  extra(c,ui){ui.viz=document.createElement('div');ui.viz.className='sizer';c.appendChild(ui.viz)},
+  update(st,ui){const E=+st.load,hsp=tot(series(PS({cloud:st.cloud/100,tilt:10})),'poa'),Wp=450,PR=.8;
+    const n=Math.max(1,Math.ceil(E/(hsp*Wp/1000*PR))),bk=E*st.aut/.8,ah=bk*1000/+st.v;DIM_N=Math.min(n,24);
+    ui.viz.innerHTML=`<div class="panels" aria-label="${n} paneles">${'<div class="pv"></div>'.repeat(Math.min(n,40))}${n>40?`<span>+${n-40}</span>`:''}</div>`+
+      (st.aut>0?`<div style="display:flex;align-items:center;gap:10px"><div class="bat"><b style="width:${Math.min(100,20+st.aut*27)}%"></b></div><span style="font-size:13px">${nf(bk,1)} kWh</span></div>`:'');
+    setRes(ui,[['Horas solares pico',nf(hsp,1)+' h'],['Paneles de 450 W',n+' ('+nf(n*.45,2)+' kWp)'],['Batería',st.aut>0?nf(bk,1)+' kWh':'—'],['Capacidad',st.aut>0?nf(Math.round(ah))+' Ah a '+st.v+' V':'—']]);
+    learn(ui,`Fórmula: paneles = consumo ÷ (horas solares pico × potencia del panel × 0,8). El <b>0,8</b> es el rendimiento del sistema: pérdidas por cables, inversor, calor y suciedad. La batería se calcula con 80 % de profundidad de descarga para alargar su vida. Como referencia, el Meta recibe en promedio unos 4 a 5 kWh/m² al día (≈ 4–5 horas solares pico; verifícalo en el Atlas de Radiación Solar del IDEAM). Es un cálculo educativo: un diseño real necesita un estudio del sitio.`)}});
+
+/* ============ EL SENSOR ============ */
+const SENS={buf:[],fault:'ok',t:0};
+card({cat:'sensor',n:9,title:'Fallas del sensor 4–20 mA',q:'¿Por qué el sensor usa 4 mA para “cero”? ¿Cómo sabemos si algo se dañó?',
+  ctrls:[{k:'fault',t:'select',label:'Simular',val:'ok',opts:[['ok','✅ Funcionamiento normal'],['cut','✂ Cable cortado'],['short','⚡ Cortocircuito'],['noise','〰 Ruido eléctrico'],['drift','📐 Sensor descalibrado (+15 %)'],['dirty','🟫 Domo sucio (−18 %)']]}],
+  legend:[[C_SOL,'Señal (mA)'],['rgba(255,106,61,.5)','Zona de falla (<3,8 o >20,5 mA)']],
+  update(st,ui){SENS.fault=st.fault;SENS.ui=ui;drawSensor()}});
+function sensorSample(){const g=gToday(H);let ma;
+  switch(SENS.fault){case'cut':ma=Math.random()*.05;break;case'short':ma=23.4+Math.random()*.2;break;
+    case'noise':ma=toMA(g)+(Math.random()+Math.random()+Math.random()-1.5)*1.4;break;case'drift':ma=toMA(g*1.15);break;case'dirty':ma=toMA(g*.82);break;default:ma=toMA(g)+(Math.random()-.5)*.04}
+  SENS.buf.push(ma);if(SENS.buf.length>60)SENS.buf.shift()}
+function drawSensor(){const ui=SENS.ui;if(!ui||ui.card.hidden)return;
+  const b=SENS.buf,ma=b.length?b[b.length-1]:4,w=b.slice(-10),mean=w.reduce((a,v)=>a+v,0)/(w.length||1);
+  const sd=Math.sqrt(w.reduce((a,v)=>a+(v-mean)**2,0)/Math.max(1,w.length));
+  miniChart(ui.svg,{x0:0,x1:59,ymax:24,ylab:'mA',xticks:[14,29,44,59],fx:h=>h>=58.5?'ahora':'−'+Math.round(59-h)+' s',fv:v=>v.toFixed(2)+' mA',
+    bands:[[0,59,'rgba(0,0,0,0)']],series:[{pts:b.map((v,i)=>({h:i+(60-b.length),v})),color:C_SOL,label:'Señal'}]});
+  // zonas de falla
+  const c=ui.svg._ch;['top','bot'].forEach(z=>{const y1=z==='top'?c.Y(24):c.Y(3.8),y2=z==='top'?c.Y(20.5):c.Y(0);
+    const r=el('rect',{x:c.m.l,y:y1,width:c.W-c.m.l-c.m.r,height:y2-y1,fill:'rgba(255,106,61,.16)'});ui.svg.insertBefore(r,ui.svg.firstChild)});
+  const g=clamp((ma-CFG.mamin)/(CFG.mamax-CFG.mamin),0,1)*CFG.gmax;
+  let stt,cls;if(ma<3.8){stt='⛔ Falla: señal bajo rango';cls='st-bad'}else if(ma>20.5){stt='⛔ Falla: sobre rango';cls='st-bad'}else if(sd>.35){stt='⚠ Señal inestable';cls='st-warn'}else{stt='✓ Señal válida';cls='st-ok'}
+  setRes(ui,[['Lectura',ma.toFixed(2)+' mA'],['Se interpreta como',ma<3.8||ma>20.5?'— (dato inválido)':nf(Math.round(g))+' W/m²'],['Estado',`<span class="status ${cls}">${stt}</span>`]]);
+  const L={ok:'Con 0 W/m² el sensor entrega <b>4 mA</b>, no 0. Ese “cero vivo” permite distinguir la noche de una falla.',
+    cut:'Si el cable se corta, la corriente cae a <b>0 mA</b>. Como la señal válida empieza en 4 mA, la Raspberry sabe de inmediato que es una falla y no la noche.',
+    short:'Un cortocircuito lleva la corriente por encima de 20 mA. Fuera del rango 3,8–20,5 mA (recomendación NAMUR NE43) el dato se marca como inválido.',
+    noise:'El ruido de motores o cables largos hace saltar la señal. Se reduce con cable apantallado, buena tierra y promediando varias lecturas.',
+    drift:'Un sensor descalibrado <b>parece normal</b>: la señal está dentro del rango. Se detecta comparando con un sensor patrón o cuando el índice de claridad supera el 100 %, algo imposible.',
+    dirty:'El domo sucio hace que el sensor marque menos de lo real, y la señal parece normal. Por eso hay que limpiarlo y revisar la calibración periódicamente.'};
+  learn(ui,L[SENS.fault]);
+}
+
+/* ============ EL SOL Y LA TIERRA ============ */
+const fmtDoy=d=>new Date(TODAY.getFullYear(),0,d).toLocaleDateString('es-CO',{day:'numeric',month:'short'});
+card({cat:'sol',n:10,title:'Fecha y latitud',q:'¿Por qué en Colombia casi no hay estaciones y en Europa sí?',
+  ctrls:[{k:'lat',t:'select',label:'Lugar',val:'59.91',opts:[['4.142','Villavicencio (4° N)'],['4.711','Bogotá (4,7° N)'],['-4.215','Leticia (4,2° S)'],['10.39','Cartagena (10,4° N)'],['40.42','Madrid (40° N)'],['59.91','Oslo (60° N)'],['-34.6','Buenos Aires (35° S)'],['89.9','Polo Norte']]},
+    {k:'doy',t:'range',label:'Fecha',min:1,max:365,val:DTODAY.doy,fmt:fmtDoy}],
+  legend:[[C_BASE,'Villavicencio',1],[C_SOL,'Lugar elegido']],
+  update(st,ui){const pp=(lat)=>series(PS({lat,lon:-75,doy:st.doy}),0,24,1/6);
+    const s=pp(+st.lat),v=pp(4.142);
+    miniChart(ui.svg,{x0:0,x1:24,ymax:90,ylab:'° altura',fy:v=>v+'°',fv:v=>nf(v,1)+'°',fx:h=>fmtH(h),series:[{pts:v.map(p=>({h:p.h,v:Math.max(0,p.el)})),color:C_BASE,dash:1,label:'Villavicencio'},{pts:s.map(p=>({h:p.h,v:Math.max(0,p.el)})),color:C_SOL,area:1,label:'Elegido'}]});
+    const len=s.filter(p=>p.el>0).length/6,mx=Math.max(...s.map(p=>p.el)),E=tot(s,'ghi',1/6);
+    setRes(ui,[['Horas de sol',len>=23.9?'24 h (sol de medianoche)':len<.1?'0 h (noche polar)':nf(len,1)+' h'],['Altura máxima del sol',nf(Math.max(0,mx),0)+'°'],['Energía con cielo despejado',kwh(E)]]);
+    learn(ui,Math.abs(+st.lat)<12?`Cerca del ecuador el sol sube casi hasta arriba y el día dura unas 12 h <b>todo el año</b>. Mueve la fecha: casi nada cambia. Por eso aquí no hay invierno ni verano por temperatura, sino temporadas de lluvia y sequía.`
+      :`Lejos del ecuador la inclinación del eje de la Tierra (23,4°) cambia mucho el recorrido del sol. Mueve la fecha entre junio y diciembre y mira cómo cambian las horas de sol: eso son las <b>estaciones</b>.`)}});
+
+const ECL={run:false,t:0,T:14,max:.9};
+function overlap(d){if(d>=2)return 0;return(2*Math.acos(d/2)-(d/2)*Math.sqrt(4-d*d))/Math.PI}
+function dForCov(c){let lo=0,hi=2;for(let i=0;i<30;i++){const m=(lo+hi)/2;if(overlap(m)>c)lo=m;else hi=m}return(lo+hi)/2}
+card({cat:'sol',n:11,title:'Eclipse solar',q:'¿Qué le pasa a la radiación cuando la Luna tapa el Sol?',chart:false,
+  ctrls:[{k:'max',t:'range',label:'Parte del sol que se cubre',min:50,max:100,val:90,fmt:v=>v+' %'},
+    {t:'button',label:'🌑 Iniciar eclipse',click:(st)=>{ECL.max=st.max/100;ECL.t=0;ECL.run=true}}],
+  extra(c,ui){const w=document.createElement('div');w.className='ecl';
+    w.innerHTML=`<svg viewBox="-75 -75 150 150" aria-label="Eclipse"><defs><radialGradient id="esun"><stop offset="0" stop-color="#FFF8DC"/><stop offset=".7" stop-color="#FFD86A"/><stop offset="1" stop-color="#F5A524"/></radialGradient></defs>
+      <circle r="58" fill="rgba(255,200,100,.18)" id="eGlow"/><circle r="40" fill="url(#esun)"/><circle r="40" fill="#0B1630" id="eMoon" cx="100"/></svg>
+      <div style="flex:1;min-width:200px;font-size:14px;line-height:1.5;color:var(--ink-2)">Al iniciar, el eclipse también se verá en la <b>escena 3D</b>, el <b>velocímetro</b> y la tarjeta del inicio. Dura unos 14 segundos.</div>`;
+    c.appendChild(w);ui.moon=w.querySelector('#eMoon');ui.glow=w.querySelector('#eGlow')},
+  update(st,ui){ECL.ui=ui;const cov=FX.eclipse,g=gToday(H);
+    setRes(ui,[['Sol cubierto',pct(cov)],['Irradiancia ahora',nf(Math.round(g))+' W/m²'],['Señal',toMA(g).toFixed(2)+' mA']]);
+    learn(ui,'La radiación cae casi en la misma proporción en que la Luna cubre el disco solar; con el 90 % cubierto llega apenas una décima parte, aunque el ojo casi no lo nota porque se adapta a la poca luz. Solo en un eclipse <b>total</b> se hace de noche por unos minutos. ⚠ Nunca mires el sol directamente, ni siquiera durante un eclipse: usa filtros certificados.')}});
+
+/* ============ RETOS ============ */
+const QZ={round:0,score:0,sc:null,done:false};
+function newScenario(){return{h:7+Math.round(Math.random()*20)/2,cloud:[0,20,40,60,80][Math.floor(Math.random()*5)],smoke:Math.random()<.3?[30,60][Math.floor(Math.random()*2)]:0,rain:Math.random()<.15?50:0}}
+card({cat:'retos',n:12,title:'Reto: ¿cuánta radiación habrá?',q:'Lee el escenario, adivina cuánto marcaría el sensor y gana puntos. 5 rondas.',chart:false,wide:true,
+  ctrls:[{k:'guess',t:'range',label:'Tu respuesta',min:0,max:1200,step:10,val:500,fmt:v=>v+' W/m²'}],
+  extra(c,ui,st,run){const q=document.createElement('div');q.className='quiz';
+    q.innerHTML=`<div class="quiz-chips" id="qChips"></div><div class="quiz-row"><button class="btn pri sm" id="qCheck">Comprobar</button><button class="btn sm" id="qNext">Siguiente</button><span class="score" id="qScore">0 pts</span><span id="qRound" style="color:var(--ink-2)"></span></div>`;
+    c.appendChild(q);
+    q.querySelector('#qCheck').onclick=()=>{if(QZ.done||QZ.answered)return;QZ.answered=true;const p=point(PS({cloud:QZ.sc.cloud/100,smoke:QZ.sc.smoke/100,rain:QZ.sc.rain/100}),QZ.sc.h),err=Math.abs(st.guess-p.ghi),pts_=Math.max(0,Math.round(100-err/5));
+      QZ.score+=pts_;QZ.last={real:p.ghi,err,pts:pts_};run()};
+    q.querySelector('#qNext').onclick=()=>{if(QZ.done){QZ.round=0;QZ.score=0;QZ.done=false}if(QZ.round>=5){QZ.done=true;run();return}QZ.round++;QZ.sc=newScenario();QZ.answered=false;QZ.last=null;run()};
+    QZ.round=1;QZ.sc=newScenario()},
+  update(st,ui){const s=QZ.sc,c=ui.card;
+    c.querySelector('#qChips').innerHTML=QZ.done?'':`<span>🕐 ${fmtH(s.h)}</span><span>☁ Nubosidad ${s.cloud} %</span>${s.smoke?`<span>🌫 Humo ${s.smoke>40?'moderado':'leve'}</span>`:''}${s.rain?'<span>🌧 Lluvia</span>':''}<span>📍 Villavicencio, hoy</span>`;
+    c.querySelector('#qScore').textContent=QZ.score+' pts';c.querySelector('#qRound').textContent=QZ.done?'':`Ronda ${QZ.round} de 5`;
+    c.querySelector('#qNext').textContent=QZ.done?'Jugar otra vez':QZ.round>=5&&QZ.answered?'Ver resultado':'Siguiente';
+    if(QZ.done){const r=QZ.score>=400?'🏆 ¡Experto solar!':QZ.score>=250?'🌤 ¡Muy bien!':'🌱 Sigue practicando';
+      setRes(ui,[['Puntaje final',QZ.score+' de 500'],['Nivel',r]]);learn(ui,'Pista para la próxima: al mediodía con cielo despejado llegan unos 1000 W/m²; en la mañana y la tarde, mucho menos, porque la luz atraviesa más atmósfera.');return}
+    if(QZ.last){const L=QZ.last;setRes(ui,[['Tu respuesta',nf(st.guess)+' W/m²'],['Valor real',nf(Math.round(L.real))+' W/m²'],['Diferencia',nf(Math.round(L.err))+' W/m²'],['Puntos',`+${L.pts}`]]);
+      learn(ui,L.err<60?'¡Casi exacto! 🎯':L.real>st.guess?'Te quedaste corto: recuerda que aun con nubes llega bastante luz difusa.':'Te pasaste: las nubes y la hora del día reducen mucho la radiación.')}
+    else{setRes(ui,[['Puntos posibles','hasta 100'],['Ronda',QZ.round+' / 5']]);learn(ui,'Mueve el control “Tu respuesta” y pulsa <b>Comprobar</b>. Entre más cerca, más puntos.')}}});
+
+/* ============ MODO LIBRE ============ */
+const FREE={};
+card({cat:'libre',n:'★',title:'Modo libre: la mesa de control',q:'Combina todo y míralo en vivo. Pulsa 🔭 Modo estudio para bajar al paisaje y ver la instalación solar reaccionando a tu configuración.',wide:true,
+  ctrls:[{k:'cloud',t:'range',label:'Nubosidad',min:0,max:100,val:20,fmt:v=>v+' %'},{k:'rain',t:'range',label:'Lluvia',min:0,max:100,val:0,fmt:v=>v+' %'},
+    {k:'smoke',t:'range',label:'Humo',min:0,max:100,val:0,fmt:v=>v+' %'},{k:'days',t:'range',label:'Días sin limpiar',min:0,max:120,val:0,fmt:v=>v+' días'},
+    {k:'tilt',t:'range',label:'Inclinación',min:0,max:90,val:10,fmt:v=>v+'°'},{k:'paz',t:'select',label:'Mirando hacia',val:'180',opts:[['180','Sur'],['0','Norte'],['90','Este'],['270','Oeste']]},
+    {k:'tmax',t:'range',label:'Temperatura máxima',min:18,max:40,val:31,fmt:v=>v+' °C'},{k:'type',t:'select',label:'Tipo de panel',val:'mono',opts:Object.entries(PTYPES).map(([k,v])=>[k,v.n])},
+    {k:'ob',t:'select',label:'Obstáculo',val:'none',opts:[['none','Ninguno'],['tree','🌳 Árbol (8 m)'],['bld','🏢 Edificio (15 m)'],['pole','Poste (6 m)']]},
+    {k:'dist',t:'range',label:'Distancia del obstáculo',min:3,max:40,val:8,fmt:v=>v+' m'},{k:'dir',t:'select',label:'Obstáculo al',val:'90',opts:[['90','Oriente (este)'],['270','Occidente (oeste)'],['180','Sur'],['0','Norte']]},
+    {k:'trk',t:'toggle',label:'Seguidor solar',val:false},{k:'scene',t:'toggle',label:'Ver el clima en el paisaje 3D',val:true},
+    {t:'button',label:'🔭 Modo estudio: ver la instalación',cls:'btn-studio',click:()=>enterStudio()}],
+  legend:[[C_BASE,'Día perfecto',1],[C_SOL,'Tu escenario (en el panel)']],
+  update(st,ui){FREE.st=st;FREE.ui=ui;
+    const p=PS({cloud:st.cloud/100,rain:st.rain/100,smoke:st.smoke/100,dirt:.25*(1-Math.exp(-st.days/45)),sdirt:.15*(1-Math.exp(-st.days/45)),tilt:st.tilt,paz:+st.paz,tmax:st.tmax,type:st.type,tracker:st.trk,obst:st.ob&&st.ob!=='none'?{...{tree:{h:8,w:6},bld:{h:15,w:20},pole:{h:6,w:.4}}[st.ob],d:+st.dist,az:+st.dir}:null});
+    FREE.p=p;if(STUDIO.on)updHud();const b=series(PS({tilt:st.tilt,paz:+st.paz})),s=series(p);
+    miniChart(ui.svg,{marker:H,series:[{pts:pts(b,'poa'),color:C_BASE,dash:1,label:'Perfecto'},{pts:pts(s,'poa'),color:C_SOL,area:1,label:'Escenario'}]});
+    const n=point(p,H);
+    setRes(ui,[['Hora',fmtH(H)],['Sensor (horizontal)',nf(Math.round(n.ghiS))+' W/m²'],['Señal',toMA(n.ghiS).toFixed(2)+' mA'],['En el panel',nf(Math.round(n.poa))+' W/m²'],
+      ['Temp. del panel',Math.round(n.tc)+' °C'],['Potencia (1 m²)',nf(Math.round(n.pw))+' W'],['Horas de sombra',nf(s.filter(q=>q.shade).length*LSTEP,1)+' h'],['Energía del día',nf(tot(s,'pw'),2)+' kWh'],['Frente al día perfecto',pct(tot(s,'poa')/tot(b,'poa'))]]);
+    learn(ui,'Usa la barra de tiempo de abajo para mover la hora del día. Prueba combinaciones: ¿qué pesa más, el humo o la suciedad? ¿Cuánto recupera un seguidor solar en un día nublado?');
+    syncFX()}});
+/* ============ MODO ESTUDIO (lado de la interfaz) ============ */
+let DIM_N=1;
+const STUDIO={on:false,blend:0,target:0,azC:Math.PI,el:.32,R:13,goal:null,thermal:false,pw:0};
+function enterStudio(){const E=EXPS.find(x=>x.o.cat==='libre');if(!E)return;
+  if(!B){toast('La escena 3D todavía no ha cargado',true);return}
+  if(STUDIO.on)return;
+  STUDIO.ph1=document.createComment('ctrls');STUDIO.ph2=document.createComment('res');
+  E.ui.ctrls.replaceWith(STUDIO.ph1);E.ui.res.replaceWith(STUDIO.ph2);$('#hudCtrls').appendChild(E.ui.ctrls);$('#hudRes').appendChild(E.ui.res);
+  document.body.classList.add('studio');$('#hud').setAttribute('aria-hidden','false');STUDIO.on=true;STUDIO.target=1;
+  STUDIO.el=1.2;STUDIO.R=30;setView('front');updHud()}
+function exitStudio(){if(!STUDIO.on)return;const E=EXPS.find(x=>x.o.cat==='libre');
+  STUDIO.ph1.replaceWith(E.ui.ctrls);STUDIO.ph2.replaceWith(E.ui.res);
+  document.body.classList.remove('studio');$('#hud').setAttribute('aria-hidden','true');STUDIO.on=false;STUDIO.target=0;E.run()}
+function setView(v){const p=FREE.p||PS({}),s=sunAt(DTODAY.doy,H,4.142,LON),face=(p.tracker&&s.el>0?s.az/D2R:p.paz)*D2R;
+  STUDIO.goal={front:{azC:face,el:.3,R:13},side:{azC:face+Math.PI/2,el:.25,R:13},top:{azC:STUDIO.azC,el:1.45,R:20},sun:{azC:s.az,el:Math.max(.12,s.el*D2R),R:17}}[v];
+  document.querySelectorAll('.hud-views button').forEach(b=>b.classList.toggle('on',b.dataset.v===v))}
+function updHud(){const n=Math.max(1,DIM_N|0);$('#hudN').textContent=`${n} panel${n>1?'es':''} de 1,8 × 1,1 m`;$('#hudN').title='El número de paneles sale del experimento 8 (Dimensiona tu sistema)'}
+document.querySelectorAll('.hud-views button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$('#hudExit').onclick=exitStudio;$('#hudBack').onclick=exitStudio;
+$('#hudThermal').onchange=e=>{STUDIO.thermal=e.target.checked;document.body.classList.toggle('thermal',STUDIO.thermal)};
+addEventListener('keydown',e=>{if(e.key==='Escape')exitStudio()});
+{const cv=$('#c3d');let drag=null;
+  cv.addEventListener('pointerdown',e=>{if(!STUDIO.on)return;drag={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(_){}STUDIO.goal=null;document.querySelectorAll('.hud-views button').forEach(b=>b.classList.remove('on'))});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;STUDIO.azC-=(e.clientX-drag.x)*.008;STUDIO.el=clamp(STUDIO.el+(e.clientY-drag.y)*.006,.04,1.5);drag={x:e.clientX,y:e.clientY}});
+  cv.addEventListener('pointerup',()=>drag=null);cv.addEventListener('pointercancel',()=>drag=null);
+  cv.addEventListener('wheel',e=>{if(!STUDIO.on)return;e.preventDefault();STUDIO.R=clamp(STUDIO.R*(1+e.deltaY*.001),5,45);STUDIO.goal=null},{passive:false});}
+function syncFX(){const on=FREE.st&&FREE.st.scene&&labTab==='libre';FX.scene=!!on;
+  if(on){FX.cloud=FREE.st.cloud/100;FX.rain=FREE.st.rain/100;FX.smoke=FREE.st.smoke/100}}
+
+/* ---------- pestañas ---------- */
+const TABS=[['clima','🌦 Clima y ambiente'],['panel','🔆 El panel'],['sensor','📡 El sensor'],['sol','🌍 El sol y la Tierra'],['retos','🎯 Retos'],['libre','🎛 Modo libre']];
+let labTab='clima';
+TABS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.setAttribute('role','tab');b.onclick=()=>showTab(k);b.dataset.k=k;$('#labTabs').appendChild(b)});
+function showTab(k){labTab=k;document.querySelectorAll('#labTabs button').forEach(b=>{b.classList.toggle('on',b.dataset.k===k);b.setAttribute('aria-selected',b.dataset.k===k)});
+  EXPS.forEach(E=>{E.ui.card.hidden=E.o.cat!==k});EXPS.forEach(E=>{if(!E.ui.card.hidden)E.run()});syncFX()}
+showTab('clima');
+addEventListener('resize',()=>EXPS.forEach(E=>{if(!E.ui.card.hidden)E.run()}));
+
+/* ---------- tick del laboratorio (llamado desde el bucle principal) ---------- */
+let labAcc=0,sensAcc=0;
+function labTick(dt){
+  // eclipse
+  if(ECL.run){ECL.t+=dt;const k=ECL.t/ECL.T;
+    if(k>=1){ECL.run=false;FX.eclipse=0}else{const dmin=dForCov(ECL.max),d=lerp(2.3,dmin,Math.sin(Math.PI*k));FX.eclipse=overlap(d);
+      if(ECL.ui){ECL.ui.moon.setAttribute('cx',(-d*40*(k<.5?1:-1)).toFixed(1));ECL.ui.glow.setAttribute('opacity',(1-FX.eclipse).toFixed(2))}}}
+  else if(ECL.ui)ECL.ui.moon.setAttribute('cx',100);
+  sensAcc+=dt;if(sensAcc>.5){sensAcc=0;sensorSample();if(labTab==='sensor')drawSensor()}
+  labAcc+=dt;if(labAcc>.3){labAcc=0;
+    if(labTab==='libre'&&FREE.ui)EXPS.find(E=>E.o.cat==='libre').run();
+    if(labTab==='sol'&&ECL.ui)EXPS.find(E=>E.o.n===11).run();}
+}
+
+/* ================= ¿CÓMO VIAJA EL DATO? ================= */
+const SHUNT=150, ADC_LSB=.000125; // ADS1115 con ganancia ±4,096 V → 0,125 mV por paso
+const IC={
+  sun:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="20" cy="20" r="7" fill="currentColor"/><path d="M20 3v5M20 32v5M3 20h5M32 20h5M8 8l3.5 3.5M28.5 28.5L32 32M8 32l3.5-3.5M28.5 11.5L32 8"/></svg>',
+  sensor:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 18a7 7 0 0 1 14 0"/><rect x="11" y="18" width="18" height="9" rx="2"/><path d="M6 31h28M20 27v4"/><circle cx="20" cy="15" r="1.6" fill="currentColor"/></svg>',
+  cable:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 26c6 0 6-12 12-12s6 12 12 12 6-6 8-6"/><path d="M4 30c6 0 6-12 12-12s6 12 12 12 6-6 8-6" opacity=".45"/></svg>',
+  shunt:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M3 20h7l2-6 4 12 4-12 4 12 4-12 2 6h7"/></svg>',
+  adc:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="11" y="11" width="18" height="18" rx="2"/><path d="M15 11V6M20 11V6M25 11V6M15 34v-5M20 34v-5M25 34v-5M11 15H6M11 20H6M11 25H6M34 15h-5M34 20h-5M34 25h-5"/><text x="20" y="23" font-size="7" text-anchor="middle" fill="currentColor" stroke="none" font-family="Inter,sans-serif" font-weight="700">ADC</text></svg>',
+  pi:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="9" width="30" height="22" rx="2"/><rect x="11" y="15" width="9" height="9" rx="1" fill="currentColor" opacity=".5"/><rect x="24" y="16" width="7" height="5" rx="1"/><path d="M8 12h24" stroke-dasharray="1.5 2"/></svg>',
+  net:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 16a20 20 0 0 1 28 0M11 21a13 13 0 0 1 18 0M16 26a6 6 0 0 1 8 0"/><circle cx="20" cy="31" r="2" fill="currentColor"/></svg>',
+  web:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="7" width="32" height="26" rx="3"/><path d="M4 13h32"/><path d="M13 27a7 7 0 0 1 14 0"/><path d="M20 27l4-5"/></svg>'};
+const fmt=(v,d)=>nf(v,d);
+function chain(){const G=gToday(H),I=toMA(G),V=I/1000*SHUNT,C=Math.round(V/ADC_LSB),V2=C*ADC_LSB,I2=V2/SHUNT*1000,G2=Math.max(0,(I2-CFG.mamin)/(CFG.mamax-CFG.mamin)*CFG.gmax);
+  const ts=`${keyOf(TODAY)}T${fmtH(H)}:00-05:00`;
+  return{G,I,V,C,G2,I2,ok:I2>=3.8&&I2<=20.5,ts}}
+const STEPS=[
+  {k:'sun',t:'El sol',tag:'Luz',v:c=>fmt(Math.round(c.G))+' W/m²',
+   p:c=>`La luz del sol llega a Villavicencio con una potencia de <b>${fmt(Math.round(c.G))} W/m²</b> en este momento: es la energía que cae cada segundo sobre un metro cuadrado. Depende de la hora, las nubes, el humo y la época del año.`,
+   big:c=>fmt(Math.round(c.G))+' W/m²',f:c=>`Irradiancia = potencia ÷ área\n= ${fmt(Math.round(c.G))} W por cada m²`},
+  {k:'sensor',t:'El sensor',tag:'Luz → corriente',v:c=>c.I.toFixed(2)+' mA',
+   p:c=>`Bajo el domo del <b>SN-300AL</b> hay una fotocelda de silicio: la luz que le llega genera una corriente muy pequeña. Un circuito interno (el “transmisor”) la convierte en una señal estándar de <b>4 a 20 mA</b>: 4 mA significa 0 W/m² y 20 mA significa ${fmt(CFG.gmax)} W/m².`,
+   big:c=>c.I.toFixed(2)+' mA',f:c=>`I = ${fmt(CFG.mamin,0)} + ${fmt(CFG.mamax-CFG.mamin,0)} × G ÷ ${fmt(CFG.gmax)}\nI = ${fmt(CFG.mamin,0)} + ${fmt(CFG.mamax-CFG.mamin,0)} × ${fmt(Math.round(c.G))} ÷ ${fmt(CFG.gmax)} = ${c.I.toFixed(2)} mA`},
+  {k:'cable',t:'El cable',tag:'Corriente',v:c=>c.I.toFixed(2)+' mA',
+   p:c=>`El dato viaja como <b>corriente</b>, no como voltaje. La corriente es la misma en todo el cable, así que no se pierde aunque el cable sea largo y casi no le afecta el ruido eléctrico. Cables del sensor: <b>café</b> = alimentación (10–30 V), <b>negro</b> = tierra, <b>azul</b> = señal +, <b>verde</b> = señal −.`,
+   big:c=>c.I.toFixed(2)+' mA',f:c=>`Lazo de corriente 4–20 mA\nRango válido: 3,8 – 20,5 mA\nEstado: ${c.ok?'✓ dato válido':'⛔ fuera de rango'}`},
+  {k:'shunt',t:'Resistencia',tag:'Corriente → voltaje',v:c=>c.V.toFixed(3)+' V',
+   p:c=>`La Raspberry no puede medir corriente, solo voltaje. Una resistencia de <b>${SHUNT} Ω</b> (resistencia “shunt”) convierte la corriente en voltaje con la <b>ley de Ohm</b>: 4 mA dan 0,60 V y 20 mA dan 3,00 V, un rango seguro para los 3,3 V que aguanta la Raspberry.`,
+   big:c=>c.V.toFixed(3)+' V',f:c=>`V = I × R\nV = ${(c.I/1000).toFixed(5)} A × ${SHUNT} Ω = ${c.V.toFixed(3)} V`},
+  {k:'adc',t:'Convertidor ADC',tag:'Voltaje → número',v:c=>fmt(c.C),
+   p:c=>`La Raspberry Pi no tiene entradas analógicas. El <b>ADS1115</b> mide el voltaje y lo convierte en un <b>número entero de 16 bits</b> que envía por el bus I²C. Cada paso del número equivale a 0,125 mV, así que el sensor se lee con muchísima precisión.`,
+   big:c=>fmt(c.C),f:c=>`número = V ÷ 0,000125 V\nnúmero = ${c.V.toFixed(4)} ÷ 0,000125 = ${fmt(c.C)}\n(en binario: ${c.C.toString(2).padStart(16,'0')})`},
+  {k:'pi',t:'Raspberry Pi 4',tag:'Número → dato',v:c=>fmt(c.G2,1)+' W/m²',
+   p:c=>`Un programa en <b>Python</b> lee el número, hace el camino de vuelta (número → voltaje → corriente → W/m²), revisa que la señal esté en rango y guarda el dato con su fecha y hora en una base de datos <b>SQLite</b> cada ${CFG.interval} min.`,
+   big:c=>fmt(c.G2,1)+' W/m²',f:c=>`I = ${fmt(c.C)} × 0,000125 ÷ ${SHUNT} = ${c.I2.toFixed(3)} mA\nG = (I − ${fmt(CFG.mamin,0)}) ÷ ${fmt(CFG.mamax-CFG.mamin,0)} × ${fmt(CFG.gmax)} = ${fmt(c.G2,1)} W/m²`},
+  {k:'net',t:'La red',tag:'Dato → mensaje',v:c=>'JSON',
+   p:c=>`El servidor <b>FastAPI</b> de la Raspberry empaqueta el dato en un mensaje <b>JSON</b> y lo envía por <b>WebSocket</b> a todos los navegadores conectados, cada segundo. Con WebSocket la conexión queda abierta, así que la página no necesita recargarse.`,
+   big:c=>'WebSocket',f:c=>`{\n  "fecha": "${c.ts}",\n  "irradiancia": ${c.G2.toFixed(1)},\n  "corriente_ma": ${c.I2.toFixed(3)},\n  "valido": ${c.ok}\n}`},
+  {k:'web',t:'Tu pantalla',tag:'Mensaje → imagen',v:c=>fmt(Math.round(c.G2))+' W/m²',
+   p:c=>`Tu navegador recibe el JSON y, en milésimas de segundo, mueve la aguja del velocímetro, alarga la curva del día solar, actualiza las tarjetas y cambia la luz del paisaje 3D. <b>Todo eso a partir de un solo número</b>.`,
+   big:c=>fmt(Math.round(c.G2))+' W/m²',f:c=>`velocímetro.valor = ${fmt(Math.round(c.G2))}\ngráfica.agregar("${c.ts.slice(11,16)}", ${fmt(Math.round(c.G2))})`}
+];
+const FL={i:0,auto:true,t:0,acc:0};
+(function buildPipe(){const p=$('#pipe');
+  STEPS.forEach((s,i)=>{if(i){const l=document.createElement('div');l.className='link'+(i===1?' lt':'');l.dataset.i=i;p.appendChild(l)}
+    const b=document.createElement('button');b.className='node';b.dataset.i=i;b.innerHTML=`${IC[s.k]}<b>${s.t}</b><span></span>`;
+    b.onclick=()=>{FL.auto=false;setFlPlay();selStep(i)};p.appendChild(b)})})();
+function setFlPlay(){$('#flPlay').textContent=FL.auto?'⏸ Pausar recorrido':'▶ Recorrido automático'}
+function selStep(i){FL.i=(i+STEPS.length)%STEPS.length;FL.t=0;
+  document.querySelectorAll('#pipe .node').forEach(n=>n.classList.toggle('on',+n.dataset.i===FL.i));
+  document.querySelectorAll('#pipe .link').forEach(l=>l.classList.toggle('flow',+l.dataset.i===FL.i+1||+l.dataset.i===FL.i));
+  renderFlow()}
+function renderFlow(){const c=chain(),s=STEPS[FL.i];
+  document.querySelectorAll('#pipe .node span').forEach((sp,i)=>sp.textContent=STEPS[i].v(c));
+  $('#fdT').innerHTML=`${FL.i+1}. ${s.t} <small>${s.tag}</small>`;$('#fdP').innerHTML=s.p(c);$('#fdV').textContent=s.big(c);$('#fdF').textContent=s.f(c);
+  $('#fdS').textContent=FL.i>=1&&FL.i<=4?'Hoy este paso es simulado: la Raspberry genera la señal con el modelo solar. Cuando se conecte el sensor, el valor será medido.':''}
+$('#flPlay').onclick=()=>{FL.auto=!FL.auto;FL.t=0;setFlPlay()};
+$('#flPrev').onclick=()=>{FL.auto=false;setFlPlay();selStep(FL.i-1)};
+$('#flNext').onclick=()=>{FL.auto=false;setFlPlay();selStep(FL.i+1)};
+selStep(0);
+function flowTick(dt){FL.acc+=dt;if(FL.acc>.5){FL.acc=0;renderFlow()}
+  if(FL.auto&&!STUDIO.on){FL.t+=dt;if(FL.t>3.2)selStep(FL.i+1)}}
+
+/* ================= bucle ================= */
+let last=performance.now(),acc=0,lastH=-1;
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
+  if(playing){H=(H+dt*SPEEDS[speedIdx][0])%24;slider.value=H}
+  mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;scrollS+=(scrollP-scrollS)*.08;
+  const D=DTODAY,elv=cosZ(D.doy,H),sky=skyAt(H),light=clamp(elv*1.4+.35,.12,1);
+  const warmth=(H>4.5&&H<19.5)?clamp(1-Math.abs(elv)/.32,0,1):0;
+  shownG+=(gToday(H)-shownG)*.08;
+  $('#g').textContent=nf(Math.round(shownG));$('#bar').style.width=(shownG/1200*100).toFixed(1)+'%';
+  $('#ma').textContent=toMA(shownG).toFixed(2)+' mA';$('#hr').textContent=fmtH(H);$('#tl').textContent=fmtH(H);$('#ph').textContent=phase(H,D);
+  const phones=Math.floor(shownG*CFG.eff/100*CFG.area/10);
+  $('#eq').textContent=shownG<5?`Sin sol: el sensor marca ${nf(CFG.mamin,0)} mA, que significa 0 W/m².`:`Con ${nf(CFG.area,1)} m² de panel (${nf(CFG.eff,0)} % de eficiencia) podrías cargar ${phones} celular${phones===1?'':'es'} al mismo tiempo.`;
+  $('#heroBody').style.opacity=1-smooth(.05,.6,scrollS);$('#dim').style.opacity=scrollS;
+  drawGauge(shownG);
+  acc+=dt;if(acc>.25){acc=0;if(isToday(sel)&&!hovering)drawChart();if(isToday(sel))updateTiles();else $('#gSky').textContent=skyLabel(clearSky(D.doy,H)>5?gToday(H)/clearSky(D.doy,H):0);
+    if(Math.abs(H-lastH)>.1){drawHist();lastH=H}}
+  try{labTick(dt)}catch(e){console.error(e)}
+  try{flowTick(dt)}catch(e){console.error(e)}
+  if(B){try{B.update(dt,t,elv,sky,light,warmth,D)}catch(e){console.error(e)}}
+}
+drawChart();drawHist();drawCal();updateTiles();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
