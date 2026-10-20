@@ -2,7 +2,7 @@
 
 Plataforma web interactiva que muestra en tiempo real la radiación solar del Campus Restrepo de la Universidad de los Llanos y la convierte en una herramienta educativa para estudiantes y comunidad.
 
-**🔗 Ver en vivo:** https://TU_USUARIO.github.io/radiacion-solar
+**🔗 Ver en vivo:** [https://TU_USUARIO.github.io/radiacion-solar](https://juanbuitrago-ing.github.io/Radiacion-Solar/)
 
 ![Portada de la plataforma](docs/portada.jpg)
 
